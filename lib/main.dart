@@ -1,141 +1,300 @@
-Here's a fully functional Instagram Clone application. I will provide you the complete project structure.
+Here is the complete project structure for an Instagram Clone application in Flutter:
 
 **pubspec.yaml**
 yml
 name: instagram_clone
-description: A new Flutter project.
+description: Instagram Clone Application
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   provider: ^6.0.3
-  http: ^0.13.4
+  http: ^0.13.5
   cupertino_icons: ^1.0.2
+  cached_network_image: ^3.2.3
+  flutter_secure_storage: ^6.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
 
 flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/icons/
+
+
+**assets/images/profile.jpg**
+markdown
+# Add a sample profile picture
+
+
+**assets/icons/favicon.png**
+markdown
+# Add a sample favicon
 
 
 **lib/main.dart**
 
 import 'package:flutter/material.dart';
-import 'package:instagram_clone/home_screen.dart';
-import 'package:instagram_clone/theme.dart';
+import 'package:instagram_clone/providers/theme_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:instagram_clone/provider/user_provider.dart';
+import 'package:instagram_clone/routes.dart';
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
       ],
-      child: const MyApp(),
+      child: MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Instagram Clone',
-      theme: AppTheme.darkTheme,
-      home: const HomeScreen(),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          title: 'Instagram Clone',
+          theme: themeProvider.themeData,
+          darkTheme: themeProvider.darkThemeData,
+          themeMode: themeProvider.themeMode,
+          initialRoute: '/',
+          routes: routes,
+        );
+      },
     );
   }
 }
 
 
-**lib/theme.dart**
+**lib/routes.dart**
+
+import 'package:flutter/material.dart';
+import 'package:instagram_clone/screens/home_screen.dart';
+import 'package:instagram_clone/screens/profile_screen.dart';
+import 'package:instagram_clone/screens/search_screen.dart';
+import 'package:instagram_clone/screens/reels_screen.dart';
+import 'package:instagram_clone/screens/notifications_screen.dart';
+
+Map<String, WidgetBuilder> routes = {
+  '/': (context) => HomeScreen(),
+  '/profile': (context) => ProfileScreen(),
+  '/search': (context) => SearchScreen(),
+  '/reels': (context) => ReelsScreen(),
+  '/notifications': (context) => NotificationsScreen(),
+};
+
+
+**lib/providers/theme_provider.dart**
 
 import 'package:flutter/material.dart';
 
-class AppTheme {
-  static final darkTheme = ThemeData(
-    primarySwatch: Colors.blue,
-    brightness: Brightness.dark,
-  );
+class ThemeProvider with ChangeNotifier {
+  ThemeMode _themeMode = ThemeMode.light;
+  ThemeMode get themeMode => _themeMode;
+
+  ThemeData _themeData = ThemeData.light();
+  ThemeData get themeData => _themeData;
+
+  ThemeData _darkThemeData = ThemeData.dark();
+  ThemeData get darkThemeData => _darkThemeData;
+
+  void toggleThemeMode() {
+    _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    notifyListeners();
+  }
 }
 
 
-**lib/home_screen.dart**
+**lib/screens/home_screen.dart**
 
 import 'package:flutter/material.dart';
-import 'package:instagram_clone/bottom_navigation_bar.dart';
-import 'package:instagram_clone/feed_screen.dart';
+import 'package:instagram_clone/widgets/stories_bar.dart';
+import 'package:instagram_clone/widgets/post_item.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
 
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const FeedScreen(),
-      bottomNavigationBar: const BottomNavigationBarWidget(),
-    );
-  }
-}
-
-
-**lib/feed_screen.dart**
-
-import 'package:flutter/material.dart';
-import 'package:instagram_clone/post_card.dart';
-import 'package:instagram_clone/stories_bar.dart';
-
-class FeedScreen extends StatelessWidget {
-  const FeedScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const StoriesBar(),
-        Expanded(
-          child: ListView.builder(
-            itemCount: 10,
-            itemBuilder: (context, index) {
-              return const PostCard();
-            },
+      appBar: AppBar(
+        title: Text('Instagram Clone'),
+      ),
+      body: Column(
+        children: [
+          StoriesBar(),
+          Expanded(
+            child: ListView.builder(
+              itemCount: 10,
+              itemBuilder: (context, index) {
+                return PostItem(
+                  postId: index,
+                  postImage: 'assets/images/post_image_$index.jpg',
+                  postLikes: 100,
+                  postComments: 50,
+                  postShares: 20,
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
 
-**lib/stories_bar.dart**
+**lib/screens/profile_screen.dart**
+
+import 'package:flutter/material.dart';
+import 'package:instagram_clone/widgets/profile_header.dart';
+import 'package:instagram_clone/widgets/post_grid.dart';
+
+class ProfileScreen extends StatefulWidget {
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Profile'),
+      ),
+      body: Column(
+        children: [
+          ProfileHeader(
+            profileImage: 'assets/images/profile.jpg',
+            profileName: 'John Doe',
+            profileBio: 'Software Engineer',
+            profileFollowers: 1000,
+            profileFollowing: 500,
+          ),
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+              ),
+              itemCount: 20,
+              itemBuilder: (context, index) {
+                return PostGridItem(
+                  postImage: 'assets/images/post_image_$index.jpg',
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+**lib/screens/search_screen.dart**
+
+import 'package:flutter/material.dart';
+import 'package:instagram_clone/widgets/search_grid.dart';
+
+class SearchScreen extends StatefulWidget {
+  @override
+  _SearchScreenState createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Search'),
+      ),
+      body: SearchGrid(),
+    );
+  }
+}
+
+
+**lib/screens/reels_screen.dart**
 
 import 'package:flutter/material.dart';
 
-class StoriesBar extends StatelessWidget {
-  const StoriesBar({Key? key}) : super(key: key);
+class ReelsScreen extends StatefulWidget {
+  @override
+  _ReelsScreenState createState() => _ReelsScreenState();
+}
 
+class _ReelsScreenState extends State<ReelsScreen> {
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 80,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Reels'),
+      ),
+      body: Center(
+        child: Text('Reels Screen'),
+      ),
+    );
+  }
+}
+
+
+**lib/screens/notifications_screen.dart**
+
+import 'package:flutter/material.dart';
+
+class NotificationsScreen extends StatefulWidget {
+  @override
+  _NotificationsScreenState createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Notifications'),
+      ),
+      body: Center(
+        child: Text('Notifications Screen'),
+      ),
+    );
+  }
+}
+
+
+**lib/widgets/stories_bar.dart**
+
+import 'package:flutter/material.dart';
+
+class StoriesBar extends StatefulWidget {
+  @override
+  _StoriesBarState createState() => _StoriesBarState();
+}
+
+class _StoriesBarState extends State<StoriesBar> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 100,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: 10,
         itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(50),
-            ),
-            child: const Icon(Icons.person, size: 50),
+          return StoryItem(
+            storyImage: 'assets/images/story_image_$index.jpg',
           );
         },
       ),
@@ -143,37 +302,123 @@ class StoriesBar extends StatelessWidget {
   }
 }
 
+class StoryItem extends StatelessWidget {
+  final String storyImage;
 
-**lib/post_card.dart**
-
-import 'package:flutter/material.dart';
-
-class PostCard extends StatelessWidget {
-  const PostCard({Key? key}) : super(key: key);
+  StoryItem({this.storyImage});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
+      margin: EdgeInsets.all(10),
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        image: DecorationImage(
+          image: AssetImage(storyImage),
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+}
+
+
+**lib/widgets/post_item.dart**
+
+import 'package:flutter/material.dart';
+
+class PostItem extends StatelessWidget {
+  final int postId;
+  final String postImage;
+  final int postLikes;
+  final int postComments;
+  final int postShares;
+
+  PostItem({
+    this.postId,
+    this.postImage,
+    this.postLikes,
+    this.postComments,
+    this.postShares,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.all(10),
       child: Column(
         children: [
-          Image.asset('assets/images/post.jpg'),
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text('Post description'),
-          ),
+          Image.asset(postImage),
           Row(
-            children: const [
+            children: [
               IconButton(
-                icon: Icon(Icons.favorite_border),
-                onPressed: null,
+                icon: Icon(Icons.favorite),
+                onPressed: () {},
               ),
+              Text('$postLikes likes'),
+              SizedBox(width: 10),
               IconButton(
                 icon: Icon(Icons.comment),
-                onPressed: null,
+                onPressed: () {},
               ),
+              Text('$postComments comments'),
+              SizedBox(width: 10),
               IconButton(
                 icon: Icon(Icons.share),
-                onPressed: null,
+                onPressed: () {},
+              ),
+              Text('$postShares shares'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+**lib/widgets/profile_header.dart**
+
+import 'package:flutter/material.dart';
+
+class ProfileHeader extends StatelessWidget {
+  final String profileImage;
+  final String profileName;
+  final String profileBio;
+  final int profileFollowers;
+  final int profileFollowing;
+
+  ProfileHeader({
+    this.profileImage,
+    this.profileName,
+    this.profileBio,
+    this.profileFollowers,
+    this.profileFollowing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.all(10),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundImage: AssetImage(profileImage),
+          ),
+          SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(profileName),
+              Text(profileBio),
+              Row(
+                children: [
+                  Text('$profileFollowers followers'),
+                  SizedBox(width: 10),
+                  Text('$profileFollowing following'),
+                ],
               ),
             ],
           ),
@@ -184,162 +429,89 @@ class PostCard extends StatelessWidget {
 }
 
 
-**lib/bottom_navigation_bar.dart**
-
-import 'package:flutter/material.dart';
-import 'package:instagram_clone/feed_screen.dart';
-import 'package:instagram_clone/profile_screen.dart';
-import 'package:instagram_clone/reels_screen.dart';
-import 'package:instagram_clone/search_screen.dart';
-
-class BottomNavigationBarWidget extends StatefulWidget {
-  const BottomNavigationBarWidget({Key? key}) : super(key: key);
-
-  @override
-  State<BottomNavigationBarWidget> createState() =>
-      _BottomNavigationBarWidgetState();
-}
-
-class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
-  int _currentIndex = 0;
-
-  final _screens = [
-    const FeedScreen(),
-    const SearchScreen(),
-    const ReelsScreen(),
-    const NotificationsScreen(),
-    const ProfileScreen(),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      currentIndex: _currentIndex,
-      onTap: (index) {
-        setState(() {
-          _currentIndex = index;
-        });
-      },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-        BottomNavigationBarItem(icon: Icon(Icons.video_library), label: 'Reels'),
-        BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notifications'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-      ],
-    );
-  }
-}
-
-
-**lib/search_screen.dart**
+**lib/widgets/post_grid.dart**
 
 import 'package:flutter/material.dart';
 
-class SearchScreen extends StatelessWidget {
-  const SearchScreen({Key? key}) : super(key: key);
-
+class PostGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
       ),
-      itemCount: 10,
+      itemCount: 20,
       itemBuilder: (context, index) {
-        return Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Image.asset('assets/images/post.jpg'),
+        return PostGridItem(
+          postImage: 'assets/images/post_image_$index.jpg',
         );
       },
     );
   }
 }
 
+class PostGridItem extends StatelessWidget {
+  final String postImage;
 
-**lib/reels_screen.dart**
-
-import 'package:flutter/material.dart';
-
-class ReelsScreen extends StatelessWidget {
-  const ReelsScreen({Key? key}) : super(key: key);
+  PostGridItem({this.postImage});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Reels Screen'),
+    return Container(
+      margin: EdgeInsets.all(5),
+      child: Image.asset(postImage),
     );
   }
 }
 
 
-**lib/profile_screen.dart**
+**lib/widgets/search_grid.dart**
 
 import 'package:flutter/material.dart';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
-
+class SearchGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const CircleAvatar(
-          backgroundImage: NetworkImage('https://picsum.photos/200'),
-          radius: 50,
-        ),
-        const Text('Username'),
-        const Text('Bio'),
-        Row(
-          children: const [
-            Text('Followers: 100'),
-            SizedBox(width: 10),
-            Text('Following: 100'),
-          ],
-        ),
-      ],
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+      ),
+      itemCount: 20,
+      itemBuilder: (context, index) {
+        return SearchGridItem(
+          mediaImage: 'assets/images/media_image_$index.jpg',
+        );
+      },
     );
   }
 }
 
+class SearchGridItem extends StatelessWidget {
+  final String mediaImage;
 
-**lib/notifications_screen.dart**
-
-import 'package:flutter/material.dart';
-
-class NotificationsScreen extends StatelessWidget {
-  const NotificationsScreen({Key? key}) : super(key: key);
+  SearchGridItem({this.mediaImage});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Notifications Screen'),
+    return Container(
+      margin: EdgeInsets.all(5),
+      child: Image.asset(mediaImage),
     );
   }
 }
 
+To run this project, you'll need to add the following packages to your `pubspec.yaml` file:
+yml
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.0.3
+  http: ^0.13.5
+  cupertino_icons: ^1.0.2
+  cached_network_image: ^3.2.3
+  flutter_secure_storage: ^6.0.0
 
-**lib/provider/user_provider.dart**
+You'll also need to run `flutter pub get` in your terminal to install the dependencies.
+Remember to replace the placeholder images with your own images in the `assets/images` directory.
 
-import 'package:flutter/material.dart';
-
-class UserProvider with ChangeNotifier {
-  String _username = '';
-
-  String get username => _username;
-
-  void setUsername(String username) {
-    _username = username;
-    notifyListeners();
-  }
-}
-
-
-Please note that you need to create the assets/images folder and add some images to it. You also need to handle the null safety and add more functionality to this code as per your requirements. This is a basic structure and you can build upon it.
-
-You can run the app by executing `flutter run` in the terminal. Make sure you have the flutter installed and the pubspec.yaml file is properly configured.
+You can then run the app on an emulator or physical device using `flutter run`.
