@@ -1,149 +1,277 @@
 import 'package:flutter/material.dart';
 
-void main() => runApp(const TodoApp());
+void main() {
+  runApp(const MyApp());
+}
 
-class TodoApp extends StatelessWidget {
-  const TodoApp({Key? key}) : super(key: key);
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'Todo App',
-      home: TodoList(),
+      home: Calculator(),
+      theme: ThemeData(
+        primaryColor: Colors.deepPurple,
+        scaffoldBackgroundColor: Colors.deepPurple,
+      ),
     );
   }
 }
 
-class Todo {
-  final String title;
-  final String description;
-  final bool isCompleted;
-
-  const Todo({
-    required this.title,
-    required this.description,
-    this.isCompleted = false,
-  });
-}
-
-class TodoList extends StatefulWidget {
-  const TodoList({Key? key}) : super(key: key);
+class Calculator extends StatefulWidget {
+  const Calculator({Key? key}) : super(key: key);
 
   @override
-  State<TodoList> createState() => _TodoListState();
+  State<Calculator> createState() => _CalculatorState();
 }
 
-class _TodoListState extends State<TodoList> {
-  final List<Todo> _todos = [];
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+class _CalculatorState extends State<Calculator> {
+  final _controller = TextEditingController();
+  double? _firstNumber;
+  String? _operator;
 
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
-  void _addTodo() {
-    if (_formKey.currentState!.validate()) {
-      final todo = Todo(
-        title: _titleController.text,
-        description: _descriptionController.text,
-      );
-      setState(() {
-        _todos.add(todo);
-      });
-      _titleController.clear();
-      _descriptionController.clear();
-    }
-  }
-
-  void _toggleTodo(Todo todo) {
+  void _onTap(String value) {
     setState(() {
-      final index = _todos.indexOf(todo);
-      _todos[index] = Todo(
-        title: todo.title,
-        description: todo.description,
-        isCompleted: !todo.isCompleted,
-      );
+      if (value == 'C') {
+        _controller.clear();
+        _firstNumber = null;
+        _operator = null;
+      } else if (value == '<') {
+        _controller.text = _controller.text.substring(0, _controller.text.length - 1);
+      } else if (value == '=') {
+        if (_firstNumber != null && _operator != null) {
+          final secondNumber = double.parse(_controller.text);
+          double result;
+          switch (_operator) {
+            case '+':
+              result = _firstNumber! + secondNumber;
+              break;
+            case '-':
+              result = _firstNumber! - secondNumber;
+              break;
+            case '*':
+              result = _firstNumber! * secondNumber;
+              break;
+            case '/':
+              if (secondNumber != 0) {
+                result = _firstNumber! / secondNumber;
+              } else {
+                result = double.nan;
+              }
+              break;
+            default:
+              throw UnimplementedError();
+          }
+          _controller.text = result.toString();
+          _firstNumber = null;
+          _operator = null;
+        }
+      } else if (value == '+' || value == '-' || value == '*' || value == '/') {
+        if (_firstNumber == null) {
+          _firstNumber = double.parse(_controller.text);
+          _operator = value;
+          _controller.clear();
+        }
+      } else {
+        _controller.text += value;
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Todo List'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  TextFormField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Title',
-                      border: OutlineInputBorder(),
+      body: Column(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.deepPurple[600],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: _controller,
+                    enabled: false,
+                    style: const TextStyle(
+                      fontSize: 36,
+                      color: Colors.white,
                     ),
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please enter a title';
-                      }
-                      return null;
-                    },
+                    textAlign: TextAlign.right,
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please enter a description';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _addTodo,
-                    child: const Text('Add Todo'),
-                  ),
-                ],
+                ),
               ),
             ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: _todos.isEmpty
-                  ? const Center(child: Text('No todos yet'))
-                  : ListView.builder(
-                      itemCount: _todos.length,
-                      itemBuilder: (context, index) {
-                        final todo = _todos[index];
-                        return ListTile(
-                          title: Text(todo.title),
-                          subtitle: Text(todo.description),
-                          trailing: Checkbox(
-                            value: todo.isCompleted,
-                            onChanged: (value) {
-                              _toggleTodo(todo);
-                            },
-                          ),
-                        );
-                      },
-                    ),
+          ),
+          Expanded(
+            flex: 6,
+            child: GridView.count(
+              crossAxisCount: 4,
+              childAspectRatio: 1,
+              padding: const EdgeInsets.all(8),
+              children: [
+                CalculatorButton(
+                  onPressed: () => _onTap('7'),
+                  child: const Text(
+                    '7',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('8'),
+                  child: const Text(
+                    '8',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('9'),
+                  child: const Text(
+                    '9',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('/'),
+                  child: const Text(
+                    '/',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('4'),
+                  child: const Text(
+                    '4',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('5'),
+                  child: const Text(
+                    '5',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('6'),
+                  child: const Text(
+                    '6',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('*'),
+                  child: const Text(
+                    '*',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('1'),
+                  child: const Text(
+                    '1',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('2'),
+                  child: const Text(
+                    '2',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('3'),
+                  child: const Text(
+                    '3',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('-'),
+                  child: const Text(
+                    '-',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('0'),
+                  child: const Text(
+                    '0',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('.'),
+                  child: const Text(
+                    '.',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('<'),
+                  child: const Text(
+                    '<',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('+'),
+                  child: const Text(
+                    '+',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('C'),
+                  child: const Text(
+                    'C',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+                CalculatorButton(
+                  onPressed: () => _onTap('='),
+                  child: const Text(
+                    '=',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CalculatorButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final Widget child;
+
+  const CalculatorButton({
+    Key? key,
+    required this.onPressed,
+    required this.child,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(50, 50),
+        primary: Colors.deepPurple[700],
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
         ),
       ),
+      onPressed: onPressed,
+      child: child,
     );
   }
 }
