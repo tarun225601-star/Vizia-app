@@ -1,7 +1,8 @@
-à¤¯à¤¹à¤¾à¤ à¤à¤ à¤¸à¤¿à¤à¤ªà¤² à¤¡à¤¿à¤à¤¿à¤à¤² à¤à¥à¤²à¥à¤ (Digital Clock) à¤à¤ª à¤à¥ à¤²à¤¿à¤ à¤¡à¤¾à¤°à¥à¤ à¤à¥à¤¡ à¤¹à¥:
+à¤¯à¤¹à¤¾à¤ à¤¦à¥ à¤à¤²à¤-à¤à¤²à¤ à¤ªà¥à¤°à¤¶à¥à¤¨à¥à¤ à¤à¥ à¤à¤¤à¥à¤¤à¤° à¤¦à¤¿à¤ à¤à¤ à¤¹à¥à¤:
 
 
-import 'dart:async';
+# à¤ªà¤¹à¤²à¤¾ à¤ªà¥à¤°à¤¶à¥à¤¨: à¤à¤ à¤¸à¤¿à¤à¤ªà¤² à¤¡à¤¿à¤à¤¿à¤à¤² à¤à¥à¤²à¥à¤ (Digital Clock) à¤à¤ª à¤¬à¤¨à¤¾à¤¨à¥ à¤à¤¾ à¤¡à¤¾à¤°à¥à¤ à¤à¥à¤¡ (à¤à¥à¤µà¤² lib/main.dart):
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -27,53 +28,77 @@ class DigitalClock extends StatefulWidget {
 }
 
 class _DigitalClockState extends State<DigitalClock> {
-  String _time = '';
-  String _date = '';
+  String _currentTime = '';
+  String _currentDate = '';
 
   @override
   void initState() {
     super.initState();
-    _getTime();
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      _getTime();
-    });
+    _updateTime();
   }
 
-  void _getTime() {
-    final DateTime now = DateTime.now();
-    final String time = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
-    final String date = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+  void _updateTime() {
+    DateTime now = DateTime.now();
     setState(() {
-      _time = time;
-      _date = date;
+      _currentTime = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+      _currentDate = '${now.day} ${_getMonth(now.month)} ${now.year}';
     });
+    Future.delayed(const Duration(seconds: 1), _updateTime);
+  }
+
+  String _getMonth(int month) {
+    switch (month) {
+      case 1:
+        return 'à¤à¤¨à¤µà¤°à¥';
+      case 2:
+        return 'à¤«à¤°à¤µà¤°à¥';
+      case 3:
+        return 'à¤®à¤¾à¤°à¥à¤';
+      case 4:
+        return 'à¤à¤ªà¥à¤°à¥à¤²';
+      case 5:
+        return 'à¤®à¤';
+      case 6:
+        return 'à¤à¥à¤¨';
+      case 7:
+        return 'à¤à¥à¤²à¤¾à¤';
+      case 8:
+        return 'à¤à¤à¤¸à¥à¤¤';
+      case 9:
+        return 'à¤¸à¤¿à¤¤à¤à¤¬à¤°';
+      case 10:
+        return 'à¤à¤à¥à¤à¥à¤¬à¤°';
+      case 11:
+        return 'à¤¨à¤µà¤à¤¬à¤°';
+      case 12:
+        return 'à¤¦à¤¿à¤¸à¤à¤¬à¤°';
+      default:
+        return '';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              _time,
-              style: const TextStyle(
-                fontSize: 64,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+      body: Container(
+        decoration: const BoxDecoration(
+          color: Colors.black,
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _currentTime,
+                style: const TextStyle(fontSize: 64, color: Colors.white),
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              _date,
-              style: const TextStyle(
-                fontSize: 24,
-                color: Colors.white,
+              const SizedBox(height: 20),
+              Text(
+                _currentDate,
+                style: const TextStyle(fontSize: 24, color: Colors.white),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -81,23 +106,22 @@ class _DigitalClockState extends State<DigitalClock> {
 }
 
 
-à¤¯à¤¹ à¤à¥à¤¡ à¤à¤ à¤¸à¤¾à¤§à¤¾à¤°à¤£ à¤¡à¤¿à¤à¤¿à¤à¤² à¤à¤¡à¤¼à¥ à¤¬à¤¨à¤¾à¤¤à¤¾ à¤¹à¥ à¤à¤¿à¤¸à¤®à¥à¤ à¤²à¤¾à¤à¤µ à¤¸à¤®à¤¯ à¤à¤° à¤à¤ à¤à¥ à¤¤à¤¾à¤°à¥à¤ à¤¦à¤¿à¤à¤¾à¤ à¤¦à¥à¤¤à¥ à¤¹à¥à¥¤ à¤¯à¤¹ à¤¡à¤¾à¤°à¥à¤ à¤®à¥à¤¡ à¤®à¥à¤ à¤¹à¥ à¤à¤° à¤®à¥à¤¬à¤¾à¤à¤²-à¤«à¥à¤°à¥à¤à¤¡à¤²à¥ à¤¹à¥à¥¤
 
-à¤à¤¬, à¤¯à¤¹à¤¾à¤ à¤à¤à¤ªà¥à¤²à¥à¤ à¤à¤¿à¤à¤¹à¤¬ à¤à¤à¥à¤¶à¤¨à¥à¤¸ à¤¯à¤¾à¤®à¤² à¤µà¤°à¥à¤à¤«à¤¼à¥à¤²à¥ à¤«à¤¼à¤¾à¤à¤² à¤¹à¥:
-
+# à¤¦à¥à¤¸à¤°à¤¾ à¤ªà¥à¤°à¤¶à¥à¤¨: à¤ªà¥à¤°à¥à¤£ à¤à¤¿à¤à¤¹à¤¬ à¤à¤à¥à¤¶à¤¨à¥à¤¸ à¤¯à¥à¤®à¤² à¤µà¤°à¥à¤à¤«à¤¼à¥à¤²à¥ à¤«à¤¼à¤¾à¤à¤² à¤¨à¤¾à¤® build.yml:
 yml
-name: Build APK
+name: Build and Deploy APK
 
 on:
   workflow_dispatch:
     inputs:
-      client_payload: {description: 'Client payload', required: false}
+      buildType: { description: 'Build Type', required: false }
   repository_dispatch:
     types: [build_apk_trigger]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
