@@ -12,8 +12,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Calculator',
       theme: ThemeData(
-        primarySwatch: Colors.grey,
-        scaffoldBackgroundColor: const Color(0xFF2F343A),
+        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
       ),
       home: const Calculator(),
     );
@@ -28,15 +28,30 @@ class Calculator extends StatefulWidget {
 }
 
 class _CalculatorState extends State<Calculator> {
+  final List<String> _buttons = [
+    '7',
+    '8',
+    '9',
+    '/',
+    '4',
+    '5',
+    '6',
+    '*',
+    '1',
+    '2',
+    '3',
+    '-',
+    '0',
+    '.',
+    '=',
+    '+'
+  ];
   String _expression = '';
-  String _result = '0';
+  String _result = '';
 
-  void _onPressed(String value) {
+  void _onButtonPressed(String button) {
     setState(() {
-      if (value == 'C') {
-        _expression = '';
-        _result = '0';
-      } else if (value == '=') {
+      if (button == '=') {
         try {
           _result = _calculate(_expression).toString();
           _expression = _result;
@@ -44,66 +59,17 @@ class _CalculatorState extends State<Calculator> {
           _result = 'Error';
           _expression = '';
         }
+      } else if (button == 'C') {
+        _expression = '';
+        _result = '';
       } else {
-        if (_expression.isEmpty && value == '0') {
-          _expression = '';
-        } else {
-          _expression += value;
-        }
+        _expression += button;
       }
     });
   }
 
   double _calculate(String expression) {
-    try {
-      return double.parse(expression);
-    } on FormatException {
-      try {
-        return _calculateSimpleExpression(expression);
-      } on FormatException {
-        rethrow;
-      }
-    }
-  }
-
-  double _calculateSimpleExpression(String expression) {
-    final operators = <String>['+', '-', '*', '/'];
-    for (var i = 0; i < operators.length; i++) {
-      final operator = operators[i];
-      final indexOfOperator = expression.lastIndexOf(operator);
-      if (indexOfOperator != -1) {
-        final left = expression.substring(0, indexOfOperator);
-        final right = expression.substring(indexOfOperator + 1);
-        try {
-          double leftNumber = double.parse(left);
-          double rightNumber = double.parse(right);
-          double result;
-          switch (operator) {
-            case '+':
-              result = leftNumber + rightNumber;
-              break;
-            case '-':
-              result = leftNumber - rightNumber;
-              break;
-            case '*':
-              result = leftNumber * rightNumber;
-              break;
-            case '/':
-              if (rightNumber == 0) {
-                throw FormatException('Division by zero');
-              }
-              result = leftNumber / rightNumber;
-              break;
-            default:
-              throw FormatException('Unknown operator');
-          }
-          return result;
-        } on FormatException {
-          throw FormatException('Invalid expression');
-        }
-      }
-    }
-    throw FormatException('Invalid expression');
+    return expr.eval(expression);
   }
 
   @override
@@ -111,213 +77,137 @@ class _CalculatorState extends State<Calculator> {
     return Scaffold(
       body: Column(
         children: [
+          const SizedBox(height: 100),
           Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Text(
-                    _expression.isEmpty ? _result : _expression,
-                    style: const TextStyle(fontSize: 40, color: Colors.white),
-                  ),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
                 ),
-              ],
+              ),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      _expression.isEmpty ? '' : _expression,
+                      style: const TextStyle(
+                        fontSize: 40,
+                        color: Colors.white,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.fade,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      _result.isEmpty ? '' : _result,
+                      style: const TextStyle(
+                        fontSize: 60,
+                        color: Colors.white,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.fade,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Expanded(
-            flex: 3,
-            child: Column(
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF454F55),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('7'),
-                          child: const Text('7'),
+            flex: 2,
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                childAspectRatio: 1,
+              ),
+              itemCount: _buttons.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () => _onButtonPressed(_buttons[index]),
+                  child: Container(
+                    margin: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: _buttons[index] == '='
+                          ? Colors.blueAccent
+                          : Colors.grey.shade800,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        _buttons[index],
+                        style: const TextStyle(
+                          fontSize: 25,
+                          color: Colors.white,
                         ),
                       ),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF454F55),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('8'),
-                          child: const Text('8'),
-                        ),
-                      ),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF454F55),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('9'),
-                          child: const Text('9'),
-                        ),
-                      ),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF666666),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('/'),
-                          child: const Text('/'),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF454F55),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('4'),
-                          child: const Text('4'),
-                        ),
-                      ),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF454F55),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('5'),
-                          child: const Text('5'),
-                        ),
-                      ),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF454F55),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('6'),
-                          child: const Text('6'),
-                        ),
-                      ),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF666666),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('*'),
-                          child: const Text('*'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF454F55),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('1'),
-                          child: const Text('1'),
-                        ),
-                      ),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF454F55),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('2'),
-                          child: const Text('2'),
-                        ),
-                      ),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF454F55),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('3'),
-                          child: const Text('3'),
-                        ),
-                      ),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF666666),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('-'),
-                          child: const Text('-'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF454F55),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('0'),
-                          child: const Text('0'),
-                        ),
-                      ),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF454F55),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('C'),
-                          child: const Text('C'),
-                        ),
-                      ),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF454F55),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('='),
-                          child: const Text('='),
-                        ),
-                      ),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF666666),
-                            textStyle: const TextStyle(fontSize: 24),
-                          ),
-                          onPressed: () => _onPressed('+'),
-                          child: const Text('+'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                );
+              },
             ),
           ),
         ],
       ),
     );
   }
+}
+
+dynamic expr;
+
+void setupExpr() {
+  expr = Expression();
+}
+
+class Expression {
+  double eval(String expression) {
+    return _eval(expression);
+  }
+
+  double _eval(String expression) {
+    expression = expression.replaceAll(' ', '');
+    var left = _parseFactor(expression);
+    var op = _getOperator(expression.substring(left['len']));
+    while (op != null) {
+      var right = _parseFactor(expression.substring(left['len'] + op['len']));
+      left['value'] = _applyOp(left['value'], op['op'], right['value']);
+      left['len'] += op['len'] + right['len'];
+      op = _getOperator(expression.substring(left['len']));
+    }
+    return left['value'];
+  }
+
+  Map<String, dynamic> _parseFactor(String expression) {
+    RegExpMatch? match = RegExp(r'^(\d+(\.\d+)?|\.\d+)(e[+-]?\d+)?').firstMatch(expression);
+    if (match != null) {
+      return {'value': double.parse(match.group(0)!), 'len': match.group(0)!.length};
+    } else {
+      return {'value': 0, 'len': 0};
+    }
+  }
+
+  Map<String, dynamic>? _getOperator(String expression) {
+    if (expression.startsWith('+')) return {'op': (a, b) => a + b, 'len': 1};
+    if (expression.startsWith('-')) return {'op': (a, b) => a - b, 'len': 1};
+    if (expression.startsWith('*')) return {'op': (a, b) => a * b, 'len': 1};
+    if (expression.startsWith('/')) return {'op': (a, b) => a / b, 'len': 1};
+    return null;
+  }
+
+  double _applyOp(double a, Function op, double b) {
+    return op(a, b);
+  }
+}
+
+void main2() {
+  setupExpr();
+  print(expr.eval("1 + 2 * 3")); // prints 7.0
+  print(expr.eval("1 + 2 / 3")); // prints 1.6666666666666667
+  print(expr.eval("10 - 2 * 3")); // prints 4.0
 }
