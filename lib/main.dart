@@ -9,12 +9,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Calculator(),
+    return MaterialApp(
+      title: 'Calculator',
       theme: ThemeData(
-        primaryColor: Colors.deepPurple,
-        scaffoldBackgroundColor: Colors.deepPurple,
+        primarySwatch: Colors.grey,
+        scaffoldBackgroundColor: const Color(0xFF2F343A),
       ),
+      home: const Calculator(),
     );
   }
 }
@@ -27,56 +28,82 @@ class Calculator extends StatefulWidget {
 }
 
 class _CalculatorState extends State<Calculator> {
-  final _controller = TextEditingController();
-  double? _firstNumber;
-  String? _operator;
+  String _expression = '';
+  String _result = '0';
 
-  void _onTap(String value) {
+  void _onPressed(String value) {
     setState(() {
       if (value == 'C') {
-        _controller.clear();
-        _firstNumber = null;
-        _operator = null;
-      } else if (value == '<') {
-        _controller.text = _controller.text.substring(0, _controller.text.length - 1);
+        _expression = '';
+        _result = '0';
       } else if (value == '=') {
-        if (_firstNumber != null && _operator != null) {
-          final secondNumber = double.parse(_controller.text);
-          double result;
-          switch (_operator) {
-            case '+':
-              result = _firstNumber! + secondNumber;
-              break;
-            case '-':
-              result = _firstNumber! - secondNumber;
-              break;
-            case '*':
-              result = _firstNumber! * secondNumber;
-              break;
-            case '/':
-              if (secondNumber != 0) {
-                result = _firstNumber! / secondNumber;
-              } else {
-                result = double.nan;
-              }
-              break;
-            default:
-              throw UnimplementedError();
-          }
-          _controller.text = result.toString();
-          _firstNumber = null;
-          _operator = null;
-        }
-      } else if (value == '+' || value == '-' || value == '*' || value == '/') {
-        if (_firstNumber == null) {
-          _firstNumber = double.parse(_controller.text);
-          _operator = value;
-          _controller.clear();
+        try {
+          _result = _calculate(_expression).toString();
+          _expression = _result;
+        } catch (e) {
+          _result = 'Error';
+          _expression = '';
         }
       } else {
-        _controller.text += value;
+        if (_expression.isEmpty && value == '0') {
+          _expression = '';
+        } else {
+          _expression += value;
+        }
       }
     });
+  }
+
+  double _calculate(String expression) {
+    try {
+      return double.parse(expression);
+    } on FormatException {
+      try {
+        return _calculateSimpleExpression(expression);
+      } on FormatException {
+        rethrow;
+      }
+    }
+  }
+
+  double _calculateSimpleExpression(String expression) {
+    final operators = <String>['+', '-', '*', '/'];
+    for (var i = 0; i < operators.length; i++) {
+      final operator = operators[i];
+      final indexOfOperator = expression.lastIndexOf(operator);
+      if (indexOfOperator != -1) {
+        final left = expression.substring(0, indexOfOperator);
+        final right = expression.substring(indexOfOperator + 1);
+        try {
+          double leftNumber = double.parse(left);
+          double rightNumber = double.parse(right);
+          double result;
+          switch (operator) {
+            case '+':
+              result = leftNumber + rightNumber;
+              break;
+            case '-':
+              result = leftNumber - rightNumber;
+              break;
+            case '*':
+              result = leftNumber * rightNumber;
+              break;
+            case '/':
+              if (rightNumber == 0) {
+                throw FormatException('Division by zero');
+              }
+              result = leftNumber / rightNumber;
+              break;
+            default:
+              throw FormatException('Unknown operator');
+          }
+          return result;
+        } on FormatException {
+          throw FormatException('Invalid expression');
+        }
+      }
+    }
+    throw FormatException('Invalid expression');
   }
 
   @override
@@ -85,160 +112,205 @@ class _CalculatorState extends State<Calculator> {
       body: Column(
         children: [
           Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.deepPurple[600],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    controller: _controller,
-                    enabled: false,
-                    style: const TextStyle(
-                      fontSize: 36,
-                      color: Colors.white,
-                    ),
-                    textAlign: TextAlign.right,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Text(
+                    _expression.isEmpty ? _result : _expression,
+                    style: const TextStyle(fontSize: 40, color: Colors.white),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
           Expanded(
-            flex: 6,
-            child: GridView.count(
-              crossAxisCount: 4,
-              childAspectRatio: 1,
-              padding: const EdgeInsets.all(8),
+            flex: 3,
+            child: Column(
               children: [
-                CalculatorButton(
-                  onPressed: () => _onTap('7'),
-                  child: const Text(
-                    '7',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF454F55),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('7'),
+                          child: const Text('7'),
+                        ),
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF454F55),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('8'),
+                          child: const Text('8'),
+                        ),
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF454F55),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('9'),
+                          child: const Text('9'),
+                        ),
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF666666),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('/'),
+                          child: const Text('/'),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                CalculatorButton(
-                  onPressed: () => _onTap('8'),
-                  child: const Text(
-                    '8',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF454F55),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('4'),
+                          child: const Text('4'),
+                        ),
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF454F55),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('5'),
+                          child: const Text('5'),
+                        ),
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF454F55),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('6'),
+                          child: const Text('6'),
+                        ),
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF666666),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('*'),
+                          child: const Text('*'),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                CalculatorButton(
-                  onPressed: () => _onTap('9'),
-                  child: const Text(
-                    '9',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF454F55),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('1'),
+                          child: const Text('1'),
+                        ),
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF454F55),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('2'),
+                          child: const Text('2'),
+                        ),
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF454F55),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('3'),
+                          child: const Text('3'),
+                        ),
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF666666),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('-'),
+                          child: const Text('-'),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                CalculatorButton(
-                  onPressed: () => _onTap('/'),
-                  child: const Text(
-                    '/',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                ),
-                CalculatorButton(
-                  onPressed: () => _onTap('4'),
-                  child: const Text(
-                    '4',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                ),
-                CalculatorButton(
-                  onPressed: () => _onTap('5'),
-                  child: const Text(
-                    '5',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                ),
-                CalculatorButton(
-                  onPressed: () => _onTap('6'),
-                  child: const Text(
-                    '6',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                ),
-                CalculatorButton(
-                  onPressed: () => _onTap('*'),
-                  child: const Text(
-                    '*',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                ),
-                CalculatorButton(
-                  onPressed: () => _onTap('1'),
-                  child: const Text(
-                    '1',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                ),
-                CalculatorButton(
-                  onPressed: () => _onTap('2'),
-                  child: const Text(
-                    '2',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                ),
-                CalculatorButton(
-                  onPressed: () => _onTap('3'),
-                  child: const Text(
-                    '3',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                ),
-                CalculatorButton(
-                  onPressed: () => _onTap('-'),
-                  child: const Text(
-                    '-',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                ),
-                CalculatorButton(
-                  onPressed: () => _onTap('0'),
-                  child: const Text(
-                    '0',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                ),
-                CalculatorButton(
-                  onPressed: () => _onTap('.'),
-                  child: const Text(
-                    '.',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                ),
-                CalculatorButton(
-                  onPressed: () => _onTap('<'),
-                  child: const Text(
-                    '<',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                ),
-                CalculatorButton(
-                  onPressed: () => _onTap('+'),
-                  child: const Text(
-                    '+',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                ),
-                CalculatorButton(
-                  onPressed: () => _onTap('C'),
-                  child: const Text(
-                    'C',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                ),
-                CalculatorButton(
-                  onPressed: () => _onTap('='),
-                  child: const Text(
-                    '=',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF454F55),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('0'),
+                          child: const Text('0'),
+                        ),
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF454F55),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('C'),
+                          child: const Text('C'),
+                        ),
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF454F55),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('='),
+                          child: const Text('='),
+                        ),
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF666666),
+                            textStyle: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => _onPressed('+'),
+                          child: const Text('+'),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -246,32 +318,6 @@ class _CalculatorState extends State<Calculator> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class CalculatorButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final Widget child;
-
-  const CalculatorButton({
-    Key? key,
-    required this.onPressed,
-    required this.child,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        minimumSize: const Size(50, 50),
-        primary: Colors.deepPurple[700],
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
-        ),
-      ),
-      onPressed: onPressed,
-      child: child,
     );
   }
 }
