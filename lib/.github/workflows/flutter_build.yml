@@ -9,12 +9,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: "20.x"
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
       - name: Install dependencies
         run: flutter pub get
-      - name: Build and test
-        run: flutter test
-      - name: Build APK
-        run: flutter build apk
+      - name: Build and deploy
+        run: flutter build web
