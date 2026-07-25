@@ -27,7 +27,65 @@ class _CalculatorState extends State<Calculator> {
 
   String _calculate(String expression) {
     try {
-      return (Function.apply(eval, [expression])).toString();
+      return expression
+          .replaceAll(' ', '')
+          .split('
+')
+          .map((e) => e
+              .replaceAll('+', '+')
+              .replaceAll('-', '-')
+              .replaceAll('*', '*')
+              .replaceAll('/', '/'))
+          .join('
+')
+          .split('
+')
+          .map((e) => e
+              .contains(RegExp(r'[+*/-]'))
+              ? (()
+              async {
+                var result = await compute(_calculateExpression, e);
+                return result.toString();
+              })()
+              : e)
+          .join('
+');
+    } catch (e) {
+      return 'Error';
+    }
+  }
+
+  Future<String> _calculateExpression(String expression) async {
+    try {
+      return (await Future.delayed(const Duration(milliseconds: 1), () {
+        try {
+          return (expression
+              .replaceAll(' ', '')
+              .split('
+')
+              .map((e) => e
+                  .replaceAll('+', '+')
+                  .replaceAll('-', '-')
+                  .replaceAll('*', '*')
+                  .replaceAll('/', '/'))
+              .join('
+')
+              .split('
+')
+              .map((e) => e
+                  .contains(RegExp(r'[+*/-]'))
+                  ? (()
+                  async {
+                    var result = await compute(_calculateExpression, e);
+                    return result.toString();
+                  })()
+                  : e)
+              .join('
+'));
+        } catch (e) {
+          return 'Error';
+        }
+      })) as String;
     } catch (e) {
       return 'Error';
     }
@@ -36,18 +94,21 @@ class _CalculatorState extends State<Calculator> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Calculator'),
+      ),
       body: Column(
         children: [
           Expanded(
             child: Container(
               padding: const EdgeInsets.all(20),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
                     _expression,
                     style: const TextStyle(fontSize: 24),
                   ),
+                  const SizedBox(height: 20),
                   Text(
                     _result,
                     style: const TextStyle(fontSize: 48),
@@ -57,30 +118,29 @@ class _CalculatorState extends State<Calculator> {
             ),
           ),
           Expanded(
-            flex: 2,
             child: Container(
               padding: const EdgeInsets.all(20),
               child: GridView.count(
                 crossAxisCount: 4,
                 childAspectRatio: 1.2,
                 children: [
-                  _buildButton('7'),
-                  _buildButton('8'),
-                  _buildButton('9'),
-                  _buildButton('/'),
-                  _buildButton('4'),
-                  _buildButton('5'),
-                  _buildButton('6'),
-                  _buildButton('*'),
-                  _buildButton('1'),
-                  _buildButton('2'),
-                  _buildButton('3'),
-                  _buildButton('-'),
-                  _buildButton('0'),
-                  _buildButton('.'),
-                  _buildButton('='),
-                  _buildButton('+'),
-                  _buildButton('C'),
+                  _buildButton('7', _onPressed),
+                  _buildButton('8', _onPressed),
+                  _buildButton('9', _onPressed),
+                  _buildButton('/', _onPressed),
+                  _buildButton('4', _onPressed),
+                  _buildButton('5', _onPressed),
+                  _buildButton('6', _onPressed),
+                  _buildButton('*', _onPressed),
+                  _buildButton('1', _onPressed),
+                  _buildButton('2', _onPressed),
+                  _buildButton('3', _onPressed),
+                  _buildButton('-', _onPressed),
+                  _buildButton('0', _onPressed),
+                  _buildButton('.', _onPressed),
+                  _buildButton('=', _onPressed),
+                  _buildButton('+', _onPressed),
+                  _buildButton('C', _onPressed),
                 ],
               ),
             ),
@@ -90,9 +150,9 @@ class _CalculatorState extends State<Calculator> {
     );
   }
 
-  Widget _buildButton(String value) {
+  Widget _buildButton(String value, Function onPressed) {
     return ElevatedButton(
-      onPressed: () => _onPressed(value),
+      onPressed: () => onPressed(value),
       child: Text(
         value,
         style: const TextStyle(fontSize: 24),
