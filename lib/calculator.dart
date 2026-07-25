@@ -15,7 +15,7 @@ class _CalculatorState extends State<Calculator> {
     setState(() {
       if (value == '=') {
         _result = _calculate(_expression);
-        _expression = _result;
+        _expression = '';
       } else if (value == 'C') {
         _expression = '';
         _result = '';
@@ -27,13 +27,7 @@ class _CalculatorState extends State<Calculator> {
 
   String _calculate(String expression) {
     try {
-      return expression
-          .replaceAll(' ', '')
-          .replaceAll('+', '+')
-          .replaceAll('-', '-')
-          .replaceAll('*', '*')
-          .replaceAll('/', '/')
-          .eval().toString();
+      return (Function.apply(eval, [expression])).toString();
     } catch (e) {
       return 'Error';
     }
@@ -47,97 +41,61 @@ class _CalculatorState extends State<Calculator> {
           Expanded(
             child: Container(
               padding: const EdgeInsets.all(20),
-              alignment: Alignment.bottomRight,
-              child: Text(
-                _expression.isEmpty ? '0' : _expression,
-                style: const TextStyle(fontSize: 50),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    _expression,
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                  Text(
+                    _result,
+                    style: const TextStyle(fontSize: 48),
+                  ),
+                ],
               ),
             ),
           ),
           Expanded(
+            flex: 2,
             child: Container(
               padding: const EdgeInsets.all(20),
-              alignment: Alignment.bottomRight,
-              child: Text(
-                _result.isEmpty ? '' : _result,
-                style: const TextStyle(fontSize: 30),
+              child: GridView.count(
+                crossAxisCount: 4,
+                childAspectRatio: 1.2,
+                children: [
+                  _buildButton('7'),
+                  _buildButton('8'),
+                  _buildButton('9'),
+                  _buildButton('/'),
+                  _buildButton('4'),
+                  _buildButton('5'),
+                  _buildButton('6'),
+                  _buildButton('*'),
+                  _buildButton('1'),
+                  _buildButton('2'),
+                  _buildButton('3'),
+                  _buildButton('-'),
+                  _buildButton('0'),
+                  _buildButton('.'),
+                  _buildButton('='),
+                  _buildButton('+'),
+                  _buildButton('C'),
+                ],
               ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: GridView.count(
-              crossAxisCount: 4,
-              childAspectRatio: 1.2,
-              children: [
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '7',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '8',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '9',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '/',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '4',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '5',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '6',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '*',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '1',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '2',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '3',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '-',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '0',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '.',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '=',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '+',
-                ),
-              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildButton(String value) {
+    return ElevatedButton(
+      onPressed: () => _onPressed(value),
+      child: Text(
+        value,
+        style: const TextStyle(fontSize: 24),
       ),
     );
   }
