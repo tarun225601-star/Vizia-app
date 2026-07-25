@@ -29,11 +29,29 @@ class _CalculatorState extends State<Calculator> {
     try {
       return expression
           .replaceAll(' ', '')
-          .replaceAll('+', '+')
-          .replaceAll('-', '-')
-          .replaceAll('*', '*')
-          .replaceAll('/', '/')
-          .eval().toString();
+          .replaceAll('+', ' + ')
+          .replaceAll('-', ' - ')
+          .replaceAll('*', ' * ')
+          .replaceAll('/', ' / ')
+          .split(' ').join('
+')
+          .split('
+')
+          .map((e) => double.parse(e))
+          .reduce((value, element) {
+            if (expression.contains('+')) {
+              return (value + element).toString();
+            } else if (expression.contains('-')) {
+              return (value - element).toString();
+            } else if (expression.contains('*')) {
+              return (value * element).toString();
+            } else if (expression.contains('/')) {
+              return (value / element).toString();
+            } else {
+              return '';
+            }
+          })
+          .toString();
     } catch (e) {
       return 'Error';
     }
@@ -71,46 +89,74 @@ class _CalculatorState extends State<Calculator> {
               crossAxisCount: 4,
               childAspectRatio: 1.2,
               children: [
-                _buildButton('7'),
-                _buildButton('8'),
-                _buildButton('9'),
-                _buildButton('/'),
-                _buildButton('4'),
-                _buildButton('5'),
-                _buildButton('6'),
-                _buildButton('*'),
-                _buildButton('1'),
-                _buildButton('2'),
-                _buildButton('3'),
-                _buildButton('-'),
-                _buildButton('0'),
-                _buildButton('.'),
-                _buildButton('='),
-                _buildButton('C'),
-                _buildButton('+'),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '7',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '8',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '9',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '/',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '4',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '5',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '6',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '*',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '1',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '2',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '3',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '-',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '0',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '.',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '=',
+                ),
+                CalculatorButton(
+                  onPressed: _onPressed,
+                  value: '+',
+                ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildButton(String value) {
-    return GestureDetector(
-      onTap: () => _onPressed(value),
-      child: Container(
-        margin: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Center(
-          child: Text(
-            value,
-            style: const TextStyle(fontSize: 24),
-          ),
-        ),
       ),
     );
   }
