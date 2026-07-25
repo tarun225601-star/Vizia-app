@@ -1,162 +1,91 @@
 import 'package:flutter/material.dart';
 
-class Calculator extends StatefulWidget {
-  const Calculator({Key? key}) : super(key: key);
+class CalculatorApp extends StatefulWidget {
+  const CalculatorApp({Key? key}) : super(key: key);
 
   @override
-  State<Calculator> createState() => _CalculatorState();
+  State<CalculatorApp> createState() => _CalculatorAppState();
 }
 
-class _CalculatorState extends State<Calculator> {
+class _CalculatorAppState extends State<CalculatorApp> {
   String _expression = '';
   String _result = '';
+  final List<String> _buttons = [
+    '7', '8', '9', '/',
+    '4', '5', '6', '*',
+    '1', '2', '3', '-',
+    '0', '.', '=', '+
+  ];
 
-  void _onPressed(String value) {
-    setState(() {
-      if (value == '=') {
-        _result = _calculate(_expression);
-        _expression = '';
-      } else if (value == 'C') {
-        _expression = '';
-        _result = '';
-      } else {
-        _expression += value;
+  void _calculate(String button) {
+    if (button == '=') {
+      try {
+        _result = _calculateExpression(_expression);
+      } catch (e) {
+        _result = 'Error';
       }
-    });
+    } else if (button == 'C') {
+      _expression = '';
+      _result = '';
+    } else {
+      _expression += button;
+    }
+    setState(() {});
   }
 
-  String _calculate(String expression) {
-    try {
-      return expression
-          .replaceAll(' ', '')
-          .replaceAll('+', ' + ')
-          .replaceAll('-', ' - ')
-          .replaceAll('*', ' * ')
-          .replaceAll('/', ' / ')
-          .split(' ').join('
-')
-          .split('
-')
-          .map((e) => double.parse(e))
-          .reduce((value, element) {
-            if (expression.contains('+')) {
-              return (value + element).toString();
-            } else if (expression.contains('-')) {
-              return (value - element).toString();
-            } else if (expression.contains('*')) {
-              return (value * element).toString();
-            } else if (expression.contains('/')) {
-              return (value / element).toString();
-            } else {
-              return '';
-            }
-          })
-          .toString();
-    } catch (e) {
-      return 'Error';
-    }
+  String _calculateExpression(String expression) {
+    return expression
+        .replaceAll(' ', '')
+        .replaceAll('+', ' + ')
+        .replaceAll('-', ' - ')
+        .replaceAll('*', ' * ')
+        .replaceAll('/', ' / ')
+        .split(' ').join()
+        .toStringAsFixed(2);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calculator'),
+    return MaterialApp(
+      title: 'Calculator App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Text(
-                    _expression,
-                    style: const TextStyle(fontSize: 24),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    _result,
-                    style: const TextStyle(fontSize: 48),
-                  ),
-                ],
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Calculator'),
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: Container(
+                alignment: Alignment.bottomRight,
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  _expression + (_result.isEmpty ? '' : ' = $_result'),
+                  style: const TextStyle(fontSize: 30),
+                ),
               ),
             ),
-          ),
-          Expanded(
-            flex: 2,
-            child: GridView.count(
-              crossAxisCount: 4,
-              childAspectRatio: 1.2,
-              children: [
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '7',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '8',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '9',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '/',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '4',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '5',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '6',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '*',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '1',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '2',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '3',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '-',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '0',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '.',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '=',
-                ),
-                CalculatorButton(
-                  onPressed: _onPressed,
-                  value: '+',
-                ),
-              ],
+            Expanded(
+              flex: 3,
+              child: GridView.count(
+                crossAxisCount: 4,
+                childAspectRatio: 1.2,
+                children: _buttons.map((button) {
+                  return ElevatedButton(
+                    onPressed: () => _calculate(button),
+                    child: Text(button),
+                  );
+                }).toList(),
+              ),
             ),
-          ),
-        ],
+            ElevatedButton(
+              onPressed: () => _calculate('C'),
+              child: const Text('Clear'),
+            ),
+          ],
+        ),
       ),
     );
   }
