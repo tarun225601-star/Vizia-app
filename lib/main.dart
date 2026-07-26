@@ -25,28 +25,13 @@ class CalculatorPage extends StatefulWidget {
 
 class _CalculatorPageState extends State<CalculatorPage> {
   final _controller = TextEditingController();
-  String _result = '';
-
-  void _calculate(String expression) {
-    try {
-      _result = expression;
-      _result = _calculateExpression(_result).toString();
-    } catch (e) {
-      _result = 'Error';
-    }
-    setState(() {});
-  }
-
-  double _calculateExpression(String expression) {
-    // Implement your calculator logic here
-    return 0;
-  }
+  double? _result;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calculator App'),
+        title: const Text('Calculator'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -56,21 +41,34 @@ class _CalculatorPageState extends State<CalculatorPage> {
               controller: _controller,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                hintText: 'Enter expression',
+                labelText: 'Enter expression',
               ),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                _calculate(_controller.text);
+                try {
+                  _result = eval(_controller.text);
+                  setState(() {});
+                } catch (e) {
+                  _result = null;
+                  setState(() {});
+                }
               },
               child: const Text('Calculate'),
             ),
             const SizedBox(height: 16),
-            Text(_result),
+            Text(_result != null ? 'Result: $_result' : 'Result: ')
           ],
         ),
       ),
     );
+  }
+
+  double eval(String expression) {
+    // Implement your expression evaluation logic here
+    // For simplicity, let's assume we're just parsing a simple math expression
+    // without any advanced logic or error handling.
+    return double.parse(expression);
   }
 }
