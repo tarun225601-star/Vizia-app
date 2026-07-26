@@ -10,20 +10,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'Calculator',
-      home: Calculator(),
+      title: 'Calculator App',
+      home: CalculatorPage(),
     );
   }
 }
 
-class Calculator extends StatefulWidget {
-  const Calculator({Key? key}) : super(key: key);
+class CalculatorPage extends StatefulWidget {
+  const CalculatorPage({Key? key}) : super(key: key);
 
   @override
-  State<Calculator> createState() => _CalculatorState();
+  State<CalculatorPage> createState() => _CalculatorPageState();
 }
 
-class _CalculatorState extends State<Calculator> {
+class _CalculatorPageState extends State<CalculatorPage> {
   String _currentInput = '';
   String _result = '';
 
@@ -34,7 +34,7 @@ class _CalculatorState extends State<Calculator> {
         _result = '';
       } else if (value == '=') {
         try {
-          _result = _calculate(_currentInput);
+          _result = _calculate(_currentInput).toString();
         } catch (e) {
           _result = 'Error';
         }
@@ -44,20 +44,14 @@ class _CalculatorState extends State<Calculator> {
     });
   }
 
-  String _calculate(String input) {
+  double _calculate(String input) {
     try {
-      return input
-          .replaceAll(' ', '')
-          .replaceAll('+', ' + ')
-          .replaceAll('-', ' - ')
-          .replaceAll('*', ' * ')
-          .replaceAll('/', ' / ')
-          .split(' ')
-          .map((e) => double.parse(e))
-          .reduce((a, b) => a + b)
-          .toString();
+      return Function.apply(
+        (String input) => double.parse(input),
+        [input],
+      );
     } catch (e) {
-      return 'Error';
+      return 0;
     }
   }
 
@@ -72,7 +66,7 @@ class _CalculatorState extends State<Calculator> {
               alignment: Alignment.bottomRight,
               child: Text(
                 _result.isEmpty ? _currentInput : _result,
-                style: const TextStyle(fontSize: 30),
+                style: const TextStyle(fontSize: 40),
               ),
             ),
           ),
@@ -111,15 +105,15 @@ class _CalculatorState extends State<Calculator> {
     return GestureDetector(
       onTap: () => _onButtonPressed(value),
       child: Container(
-        margin: const EdgeInsets.all(5),
+        margin: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
+          color: Colors.blue,
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Center(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 20),
+            style: const TextStyle(fontSize: 24, color: Colors.white),
           ),
         ),
       ),
