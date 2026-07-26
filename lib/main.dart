@@ -1,184 +1,124 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const CalculatorApp());
-}
-
 class CalculatorApp extends StatelessWidget {
-  const CalculatorApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Calculator',
+    return MaterialApp(
+      title: 'Calculator App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
       home: CalculatorHomePage(),
     );
   }
 }
 
 class CalculatorHomePage extends StatefulWidget {
-  const CalculatorHomePage({Key? key}) : super(key: key);
-
   @override
-  State<CalculatorHomePage> createState() => _CalculatorHomePageState();
+  _CalculatorHomePageState createState() => _CalculatorHomePageState();
 }
 
 class _CalculatorHomePageState extends State<CalculatorHomePage> {
-  final _controller = TextEditingController(text: '');
-  double? _result;
-  String? _operation;
-  String? _firstNumber;
-  String? _secondNumber;
+  String _currentInput = '';
+  String _result = '';
+  double _num1 = 0;
+  double _num2 = 0;
+  String _operation = '';
 
-  void _calculate() {
-    if (_firstNumber != null && _secondNumber != null && _operation != null) {
-      final first = double.parse(_firstNumber!);
-      final second = double.parse(_secondNumber!);
-      switch (_operation) {
-        case '+':
-          _result = first + second;
-          break;
-        case '-':
-          _result = first - second;
-          break;
-        case '*':
-          _result = first * second;
-          break;
-        case '/':
-          if (second != 0) {
-            _result = first / second;
-          }
-          break;
+  void _onButtonPressed(String value) {
+    setState(() {
+      if (value == 'C') {
+        _currentInput = '';
+        _result = '';
+        _num1 = 0;
+        _num2 = 0;
+        _operation = '';
+      } else if (value == '+' || value == '-' || value == '*' || value == '/') {
+        _num1 = double.parse(_currentInput);
+        _operation = value;
+        _currentInput = '';
+      } else if (value == '=') {
+        _num2 = double.parse(_currentInput);
+        if (_operation == '+') {
+          _result = (_num1 + _num2).toString();
+        } else if (_operation == '-') {
+          _result = (_num1 - _num2).toString();
+        } else if (_operation == '*') {
+          _result = (_num1 * _num2).toString();
+        } else if (_operation == '/') {
+          _result = (_num1 / _num2).toString();
+        }
+        _currentInput = '';
+      } else {
+        _currentInput += value;
       }
-      setState(() {});
-    }
-  }
-
-  void _clear() {
-    setState(() {
-      _controller.text = '';
-      _result = null;
-      _operation = null;
-      _firstNumber = null;
-      _secondNumber = null;
     });
-  }
-
-  void _appendNumber(String number) {
-    if (_operation == null) {
-      _firstNumber = _controller.text + number;
-    } else {
-      _secondNumber = _controller.text + number;
-    }
-    setState(() {
-      _controller.text += number;
-    });
-  }
-
-  void _appendOperation(String operation) {
-    if (_firstNumber != null) {
-      setState(() {
-        _operation = operation;
-        _controller.text += operation;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calculator'),
+      body: Column(
+        children: [
+          Container(
+            margin: EdgeInsets.all(20),
+            child: Text(
+              _currentInput + _result,
+              style: TextStyle(fontSize: 24),
+            ),
+          ),
+          Expanded(
+            child: GridView.count(
+              crossAxisCount: 4,
+              childAspectRatio: 1.2,
+              children: [
+                CalculatorButton('7', _onButtonPressed),
+                CalculatorButton('8', _onButtonPressed),
+                CalculatorButton('9', _onButtonPressed),
+                CalculatorButton('/', _onButtonPressed),
+                CalculatorButton('4', _onButtonPressed),
+                CalculatorButton('5', _onButtonPressed),
+                CalculatorButton('6', _onButtonPressed),
+                CalculatorButton('*', _onButtonPressed),
+                CalculatorButton('1', _onButtonPressed),
+                CalculatorButton('2', _onButtonPressed),
+                CalculatorButton('3', _onButtonPressed),
+                CalculatorButton('-', _onButtonPressed),
+                CalculatorButton('0', _onButtonPressed),
+                CalculatorButton('.', _onButtonPressed),
+                CalculatorButton('=', _onButtonPressed),
+                CalculatorButton('+', _onButtonPressed),
+                CalculatorButton('C', _onButtonPressed),
+              ],
+            ),
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _controller,
-              readOnly: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 4,
-                childAspectRatio: 1,
-                children: [
-                  ElevatedButton(
-                    onPressed: () => _appendNumber('7'),
-                    child: const Text('7'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendNumber('8'),
-                    child: const Text('8'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendNumber('9'),
-                    child: const Text('9'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendOperation('/'),
-                    child: const Text('/'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendNumber('4'),
-                    child: const Text('4'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendNumber('5'),
-                    child: const Text('5'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendNumber('6'),
-                    child: const Text('6'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendOperation('*'),
-                    child: const Text('*'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendNumber('1'),
-                    child: const Text('1'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendNumber('2'),
-                    child: const Text('2'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendNumber('3'),
-                    child: const Text('3'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendOperation('-'),
-                    child: const Text('-'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendNumber('0'),
-                    child: const Text('0'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendNumber('.'),
-                    child: const Text('.'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendNumber('='),
-                    child: const Text('='),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _appendOperation('+'),
-                    child: const Text('+'),
-                  ),
-                  ElevatedButton(
-                    onPressed: _clear,
-                    child: const Text('C'),
-                  ),
-                ],
-              ),
-            ),
-          ],
+    );
+  }
+}
+
+class CalculatorButton extends StatelessWidget {
+  final String _value;
+  final Function _onButtonPressed;
+
+  CalculatorButton(this._value, this._onButtonPressed);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _onButtonPressed(_value),
+      child: Container(
+        margin: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Center(
+          child: Text(
+            _value,
+            style: TextStyle(fontSize: 24),
+          ),
         ),
       ),
     );
