@@ -10,225 +10,128 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'Simple Calculator',
-      home: Calculator(),
+      title: 'Calculator App',
+      home: CalculatorPage(),
     );
   }
 }
 
-class Calculator extends StatefulWidget {
-  const Calculator({Key? key}) : super(key: key);
+class CalculatorPage extends StatefulWidget {
+  const CalculatorPage({Key? key}) : super(key: key);
 
   @override
-  State<Calculator> createState() => _CalculatorState();
+  State<CalculatorPage> createState() => _CalculatorPageState();
 }
 
-class _CalculatorState extends State<Calculator> {
-  final _controller = TextEditingController(text: '0');
-  double _result = 0;
-  String _operation = '';
-  double _num1 = 0;
-  double _num2 = 0;
+class _CalculatorPageState extends State<CalculatorPage> {
+  String _currentInput = '';
+  String _result = '';
 
-  void _calculate() {
+  void _onButtonPressed(String value) {
     setState(() {
-      _num1 = double.parse(_controller.text);
-      switch (_operation) {
-        case '+':
-          _result = _num1 + _num2;
-          break;
-        case '-':
-          _result = _num1 - _num2;
-          break;
-        case '*':
-          _result = _num1 * _num2;
-          break;
-        case '/':
-          _result = _num1 / _num2;
-          break;
-        default:
-          _result = 0;
+      if (value == 'C') {
+        _currentInput = '';
+        _result = '';
+      } else if (value == '=') {
+        try {
+          _result = _calculateResult(_currentInput);
+        } catch (e) {
+          _result = 'Error';
+        }
+      } else {
+        _currentInput += value;
       }
-      _controller.text = _result.toString();
     });
   }
 
-  void _clear() {
-    setState(() {
-      _controller.text = '0';
-      _result = 0;
-      _operation = '';
-      _num1 = 0;
-      _num2 = 0;
-    });
+  String _calculateResult(String input) {
+    try {
+      return input
+          .replaceAll(' ', '')
+          .replaceAll('+', ' + ')
+          .replaceAll('-', ' - ')
+          .replaceAll('*', ' * ')
+          .replaceAll('/', ' / ')
+          .split(' ').map((e) => double.parse(e)).reduce((a, b) {
+        final operator = input.substring(input.indexOf(a.toString()) + a.toString().length, input.indexOf(b.toString()));
+        switch (operator) {
+          case '+':
+            return a + b;
+          case '-':
+            return a - b;
+          case '*':
+            return a * b;
+          case '/':
+            return a / b;
+          default:
+            throw Exception('Invalid operator');
+        }
+      }).toStringAsFixed(2);
+    } catch (e) {
+      throw Exception('Invalid input');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Simple Calculator'),
+      body: Column(
+        children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              alignment: Alignment.bottomRight,
+              child: Text(
+                _result.isEmpty ? _currentInput : _result,
+                style: const TextStyle(fontSize: 40),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: GridView.count(
+              crossAxisCount: 4,
+              childAspectRatio: 1.2,
+              children: [
+                _buildButton('7'),
+                _buildButton('8'),
+                _buildButton('9'),
+                _buildButton('/'),
+                _buildButton('4'),
+                _buildButton('5'),
+                _buildButton('6'),
+                _buildButton('*'),
+                _buildButton('1'),
+                _buildButton('2'),
+                _buildButton('3'),
+                _buildButton('-'),
+                _buildButton('0'),
+                _buildButton('.'),
+                _buildButton('='),
+                _buildButton('+'),
+                _buildButton('C'),
+              ],
+            ),
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _controller,
-              readOnly: true,
-              textAlign: TextAlign.right,
-              style: const TextStyle(fontSize: 24),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '7';
-                    });
-                  },
-                  child: const Text('7'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '8';
-                    });
-                  },
-                  child: const Text('8'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '9';
-                    });
-                  },
-                  child: const Text('9'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '/';
-                      _operation = '/';
-                      _num2 = double.parse(_controller.text.substring(0, _controller.text.length - 1));
-                    });
-                  },
-                  child: const Text('/'),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '4';
-                    });
-                  },
-                  child: const Text('4'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '5';
-                    });
-                  },
-                  child: const Text('5'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '6';
-                    });
-                  },
-                  child: const Text('6'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '*';
-                      _operation = '*';
-                      _num2 = double.parse(_controller.text.substring(0, _controller.text.length - 1));
-                    });
-                  },
-                  child: const Text('*'),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '1';
-                    });
-                  },
-                  child: const Text('1'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '2';
-                    });
-                  },
-                  child: const Text('2'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '3';
-                    });
-                  },
-                  child: const Text('3'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '-';
-                      _operation = '-';
-                      _num2 = double.parse(_controller.text.substring(0, _controller.text.length - 1));
-                    });
-                  },
-                  child: const Text('-'),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '0';
-                    });
-                  },
-                  child: const Text('0'),
-                ),
-                ElevatedButton(
-                  onPressed: _clear,
-                  child: const Text('C'),
-                ),
-                ElevatedButton(
-                  onPressed: _calculate,
-                  child: const Text('='),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '+';
-                      _operation = '+';
-                      _num2 = double.parse(_controller.text.substring(0, _controller.text.length - 1));
-                    });
-                  },
-                  child: const Text('+'),
-                ),
-              ],
-            ),
-          ],
+    );
+  }
+
+  Widget _buildButton(String value) {
+    return GestureDetector(
+      onTap: () => _onButtonPressed(value),
+      child: Container(
+        margin: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFf0f0f0),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Center(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 24),
+          ),
         ),
       ),
     );
