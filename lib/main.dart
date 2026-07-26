@@ -9,21 +9,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Calculator',
-      home: Calculator(),
+    return MaterialApp(
+      title: 'Calculator App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const CalculatorPage(),
     );
   }
 }
 
-class Calculator extends StatefulWidget {
-  const Calculator({Key? key}) : super(key: key);
+class CalculatorPage extends StatefulWidget {
+  const CalculatorPage({Key? key}) : super(key: key);
 
   @override
-  State<Calculator> createState() => _CalculatorState();
+  State<CalculatorPage> createState() => _CalculatorPageState();
 }
 
-class _CalculatorState extends State<Calculator> {
+class _CalculatorPageState extends State<CalculatorPage> {
   String _currentInput = '';
   String _result = '';
 
@@ -34,7 +37,7 @@ class _CalculatorState extends State<Calculator> {
         _result = '';
       } else if (value == '=') {
         try {
-          _result = _calculate(_currentInput).toString();
+          _result = _calculateResult(_currentInput);
         } catch (e) {
           _result = 'Error';
         }
@@ -44,53 +47,41 @@ class _CalculatorState extends State<Calculator> {
     });
   }
 
-  double _calculate(String input) {
+  String _calculateResult(String input) {
     try {
-      return double.parse(input);
-    } catch (e) {
-      try {
-        return eval(input);
-      } catch (e) {
-        rethrow;
-      }
-    }
-  }
-
-  double eval(String input) {
-    try {
-      return double.parse(input);
-    } catch (e) {
-      final regex = RegExp(r'([0-9]+\.?[0-9]*)\s*([+\-*/])\s*([0-9]+\.?[0-9]*)');
-      final match = regex.firstMatch(input);
-      if (match != null) {
-        final num1 = double.parse(match.group(1)!);
-        final operator = match.group(2)!;
-        final num2 = double.parse(match.group(3)!);
-        switch (operator) {
-          case '+':
-            return num1 + num2;
-          case '-':
-            return num1 - num2;
-          case '*':
-            return num1 * num2;
-          case '/':
-            if (num2 != 0) {
-              return num1 / num2;
+      return input
+          .replaceAll(' ', '')
+          .replaceAll('+', ' + ')
+          .replaceAll('-', ' - ')
+          .replaceAll('*', ' * ')
+          .replaceAll('/', ' / ')
+          .split(' ')
+          .map((e) => double.parse(e))
+          .reduce((a, b) {
+            if (input.contains('+')) {
+              return (a + b).toString();
+            } else if (input.contains('-')) {
+              return (a - b).toString();
+            } else if (input.contains('*')) {
+              return (a * b).toString();
+            } else if (input.contains('/')) {
+              return (a / b).toString();
             } else {
-              throw Exception('Division by zero');
+              return '0';
             }
-          default:
-            throw Exception('Invalid operator');
-        }
-      } else {
-        throw Exception('Invalid input');
-      }
+          })
+          .toString();
+    } catch (e) {
+      return 'Error';
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Calculator App'),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -98,8 +89,18 @@ class _CalculatorState extends State<Calculator> {
               padding: const EdgeInsets.all(20),
               alignment: Alignment.bottomRight,
               child: Text(
-                _result.isEmpty ? _currentInput : _result,
-                style: const TextStyle(fontSize: 40),
+                _currentInput.isEmpty ? '0' : _currentInput,
+                style: const TextStyle(fontSize: 30),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              alignment: Alignment.bottomRight,
+              child: Text(
+                _result.isEmpty ? '' : _result,
+                style: const TextStyle(fontSize: 20),
               ),
             ),
           ),
@@ -109,46 +110,78 @@ class _CalculatorState extends State<Calculator> {
               crossAxisCount: 4,
               childAspectRatio: 1.2,
               children: [
-                _buildButton('7'),
-                _buildButton('8'),
-                _buildButton('9'),
-                _buildButton('/'),
-                _buildButton('4'),
-                _buildButton('5'),
-                _buildButton('6'),
-                _buildButton('*'),
-                _buildButton('1'),
-                _buildButton('2'),
-                _buildButton('3'),
-                _buildButton('-'),
-                _buildButton('0'),
-                _buildButton('.'),
-                _buildButton('='),
-                _buildButton('+'),
-                _buildButton('C'),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('7'),
+                  child: const Text('7'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('8'),
+                  child: const Text('8'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('9'),
+                  child: const Text('9'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('/'),
+                  child: const Text('/'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('4'),
+                  child: const Text('4'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('5'),
+                  child: const Text('5'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('6'),
+                  child: const Text('6'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('*'),
+                  child: const Text('*'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('1'),
+                  child: const Text('1'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('2'),
+                  child: const Text('2'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('3'),
+                  child: const Text('3'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('-'),
+                  child: const Text('-'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('0'),
+                  child: const Text('0'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('.'),
+                  child: const Text('.'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('='),
+                  child: const Text('='),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('+'),
+                  child: const Text('+'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _onButtonPressed('C'),
+                  child: const Text('C'),
+                ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildButton(String value) {
-    return GestureDetector(
-      onTap: () => _onButtonPressed(value),
-      child: Container(
-        margin: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-        ),
-        child: Center(
-          child: Text(
-            value,
-            style: const TextStyle(fontSize: 24),
-          ),
-        ),
       ),
     );
   }
