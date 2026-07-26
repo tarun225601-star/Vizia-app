@@ -1,180 +1,185 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const CalculatorApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class CalculatorApp extends StatelessWidget {
+  const CalculatorApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Calculator',
-      home: Calculator(),
+      home: CalculatorHomePage(),
     );
   }
 }
 
-class Calculator extends StatefulWidget {
-  const Calculator({Key? key}) : super(key: key);
+class CalculatorHomePage extends StatefulWidget {
+  const CalculatorHomePage({Key? key}) : super(key: key);
 
   @override
-  State<Calculator> createState() => _CalculatorState();
+  State<CalculatorHomePage> createState() => _CalculatorHomePageState();
 }
 
-class _CalculatorState extends State<Calculator> {
-  String _currentInput = '';
-  String _result = '';
+class _CalculatorHomePageState extends State<CalculatorHomePage> {
+  final _controller = TextEditingController(text: '');
+  double? _result;
+  String? _operation;
+  String? _firstNumber;
+  String? _secondNumber;
 
-  void _onButtonPressed(String value) {
-    setState(() {
-      if (value == 'C') {
-        _currentInput = '';
-        _result = '';
-      } else if (value == '=') {
-        try {
-          _result = _calculate(_currentInput).toString();
-        } catch (e) {
-          _result = 'Error';
-        }
-      } else {
-        _currentInput += value;
+  void _calculate() {
+    if (_firstNumber != null && _secondNumber != null && _operation != null) {
+      final first = double.parse(_firstNumber!);
+      final second = double.parse(_secondNumber!);
+      switch (_operation) {
+        case '+':
+          _result = first + second;
+          break;
+        case '-':
+          _result = first - second;
+          break;
+        case '*':
+          _result = first * second;
+          break;
+        case '/':
+          if (second != 0) {
+            _result = first / second;
+          }
+          break;
       }
+      setState(() {});
+    }
+  }
+
+  void _clear() {
+    setState(() {
+      _controller.text = '';
+      _result = null;
+      _operation = null;
+      _firstNumber = null;
+      _secondNumber = null;
     });
   }
 
-  double _calculate(String input) {
-    try {
-      return Function.apply(
-        (String input) => input
-            .replaceAll(' ', '')
-            .split('
-')
-            .map((e) => e)
-            .reduce((value, element) => value + element),
-        [input],
-      );
-    } catch (e) {
-      throw Exception('Invalid input');
+  void _appendNumber(String number) {
+    if (_operation == null) {
+      _firstNumber = _controller.text + number;
+    } else {
+      _secondNumber = _controller.text + number;
+    }
+    setState(() {
+      _controller.text += number;
+    });
+  }
+
+  void _appendOperation(String operation) {
+    if (_firstNumber != null) {
+      setState(() {
+        _operation = operation;
+        _controller.text += operation;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              alignment: Alignment.bottomRight,
-              child: Text(
-                _currentInput.isEmpty ? '0' : _currentInput,
-                style: const TextStyle(fontSize: 50),
+      appBar: AppBar(
+        title: const Text('Calculator'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _controller,
+              readOnly: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
               ),
             ),
-          ),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              alignment: Alignment.bottomRight,
-              child: Text(
-                _result.isEmpty ? '' : _result,
-                style: const TextStyle(fontSize: 30),
+            const SizedBox(height: 16),
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 4,
+                childAspectRatio: 1,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => _appendNumber('7'),
+                    child: const Text('7'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendNumber('8'),
+                    child: const Text('8'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendNumber('9'),
+                    child: const Text('9'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendOperation('/'),
+                    child: const Text('/'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendNumber('4'),
+                    child: const Text('4'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendNumber('5'),
+                    child: const Text('5'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendNumber('6'),
+                    child: const Text('6'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendOperation('*'),
+                    child: const Text('*'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendNumber('1'),
+                    child: const Text('1'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendNumber('2'),
+                    child: const Text('2'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendNumber('3'),
+                    child: const Text('3'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendOperation('-'),
+                    child: const Text('-'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendNumber('0'),
+                    child: const Text('0'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendNumber('.'),
+                    child: const Text('.'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendNumber('='),
+                    child: const Text('='),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _appendOperation('+'),
+                    child: const Text('+'),
+                  ),
+                  ElevatedButton(
+                    onPressed: _clear,
+                    child: const Text('C'),
+                  ),
+                ],
               ),
             ),
-          ),
-          Expanded(
-            flex: 3,
-            child: GridView.count(
-              crossAxisCount: 4,
-              childAspectRatio: 1.2,
-              children: [
-                ...['7', '8', '9', '/'].map((e) => InkWell(
-                  onTap: () => _onButtonPressed(e),
-                  child: Container(
-                    margin: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: Text(
-                        e,
-                        style: const TextStyle(fontSize: 30, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                )),
-                ...['4', '5', '6', '*'].map((e) => InkWell(
-                  onTap: () => _onButtonPressed(e),
-                  child: Container(
-                    margin: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: Text(
-                        e,
-                        style: const TextStyle(fontSize: 30, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                )),
-                ...['1', '2', '3', '-'].map((e) => InkWell(
-                  onTap: () => _onButtonPressed(e),
-                  child: Container(
-                    margin: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: Text(
-                        e,
-                        style: const TextStyle(fontSize: 30, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                )),
-                ...['0', '.', '=', 'C'].map((e) => InkWell(
-                  onTap: () => _onButtonPressed(e),
-                  child: Container(
-                    margin: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: Text(
-                        e,
-                        style: const TextStyle(fontSize: 30, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                )),
-                ...['+', '+'].map((e) => InkWell(
-                  onTap: () => _onButtonPressed(e),
-                  child: Container(
-                    margin: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: Text(
-                        e,
-                        style: const TextStyle(fontSize: 30, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                )),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
