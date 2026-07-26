@@ -24,28 +24,16 @@ class CalculatorPage extends StatefulWidget {
 }
 
 class _CalculatorPageState extends State<CalculatorPage> {
-  String _expression = '';
-  String _result = '';
+  final _controller = TextEditingController(text: '0');
+  double? _result;
 
-  void _onPressed(String value) {
-    setState(() {
-      if (value == '=') {
-        _result = _calculate(_expression);
-        _expression = '';
-      } else if (value == 'C') {
-        _expression = '';
-        _result = '';
-      } else {
-        _expression += value;
-      }
-    });
-  }
-
-  String _calculate(String expression) {
+  void _calculate() {
     try {
-      return expression.eval().toString();
+      _result = double.parse(_controller.text);
+      setState(() {});
     } catch (e) {
-      return 'Error';
+      _result = null;
+      setState(() {});
     }
   }
 
@@ -55,62 +43,31 @@ class _CalculatorPageState extends State<CalculatorPage> {
       appBar: AppBar(
         title: const Text('Calculator'),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Text(
-                    _expression,
-                    style: const TextStyle(fontSize: 24),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    _result,
-                    style: const TextStyle(fontSize: 48),
-                  ),
-                ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _controller,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Enter a number',
               ),
             ),
-          ),
-          Expanded(
-            flex: 2,
-            child: GridView.count(
-              crossAxisCount: 4,
-              childAspectRatio: 1.2,
-              children: [
-                _buildButton('7'),
-                _buildButton('8'),
-                _buildButton('9'),
-                _buildButton('/'),
-                _buildButton('4'),
-                _buildButton('5'),
-                _buildButton('6'),
-                _buildButton('*'),
-                _buildButton('1'),
-                _buildButton('2'),
-                _buildButton('3'),
-                _buildButton('-'),
-                _buildButton('0'),
-                _buildButton('.'),
-                _buildButton('='),
-                _buildButton('C'),
-              ],
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _calculate,
+              child: const Text('Calculate'),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildButton(String value) {
-    return ElevatedButton(
-      onPressed: () => _onPressed(value),
-      child: Text(
-        value,
-        style: const TextStyle(fontSize: 24),
+            const SizedBox(height: 16),
+            Text(
+              _result != null
+                  ? 'Result: $_result'
+                  : 'Invalid input',
+              style: const TextStyle(fontSize: 24),
+            ),
+          ],
+        ),
       ),
     );
   }
