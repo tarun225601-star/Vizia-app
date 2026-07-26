@@ -26,34 +26,23 @@ class Calculator extends StatefulWidget {
 class _CalculatorState extends State<Calculator> {
   final _controller = TextEditingController(text: '0');
   double _result = 0;
-  String _operator = '';
-  double _num1 = 0;
-  double _num2 = 0;
+  String _operation = '';
 
-  void _calculate() {
+  void _calculate(String operation) {
     setState(() {
-      _num1 = double.parse(_controller.text);
+      if (operation == '=') {
+        _result = _calculateResult(_controller.text);
+        _controller.text = _result.toString();
+      } else {
+        _operation = operation;
+        _controller.text += operation;
+      }
     });
+  }
 
-    if (_operator == '+') {
-      setState(() {
-        _result = _num1 + _num2;
-      });
-    } else if (_operator == '-') {
-      setState(() {
-        _result = _num1 - _num2;
-      });
-    } else if (_operator == '*') {
-      setState(() {
-        _result = _num1 * _num2;
-      });
-    } else if (_operator == '/') {
-      setState(() {
-        _result = _num1 / _num2;
-      });
-    }
-
-    _controller.text = _result.toString();
+  double _calculateResult(String expression) {
+    // Implement your calculation logic here
+    return 0;
   }
 
   @override
@@ -63,7 +52,7 @@ class _CalculatorState extends State<Calculator> {
         title: const Text('Simple Calculator'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
@@ -72,191 +61,75 @@ class _CalculatorState extends State<Calculator> {
               textAlign: TextAlign.right,
               style: const TextStyle(fontSize: 24),
             ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            const SizedBox(height: 16),
+            GridView.count(
+              shrinkWrap: true,
+              crossAxisCount: 4,
+              childAspectRatio: 1,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text = '0';
-                      _result = 0;
-                      _operator = '';
-                      _num1 = 0;
-                      _num2 = 0;
-                    });
-                  },
-                  child: const Text('C'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text = _controller.text.substring(0, _controller.text.length - 1);
-                    });
-                  },
-                  child: const Text('<'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _num2 = double.parse(_controller.text);
-                      _operator = '+';
-                      _controller.text = '';
-                    });
-                  },
-                  child: const Text('+'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _num2 = double.parse(_controller.text);
-                      _operator = '-';
-                      _controller.text = '';
-                    });
-                  },
-                  child: const Text('-'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _num2 = double.parse(_controller.text);
-                      _operator = '*';
-                      _controller.text = '';
-                    });
-                  },
-                  child: const Text('*'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _num2 = double.parse(_controller.text);
-                      _operator = '/';
-                      _controller.text = '';
-                    });
-                  },
-                  child: const Text('/'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '7';
-                    });
-                  },
+                  onPressed: () => _calculate('7'),
                   child: const Text('7'),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '8';
-                    });
-                  },
+                  onPressed: () => _calculate('8'),
                   child: const Text('8'),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '9';
-                    });
-                  },
+                  onPressed: () => _calculate('9'),
                   child: const Text('9'),
                 ),
                 ElevatedButton(
-                  onPressed: _calculate,
-                  child: const Text('='),
+                  onPressed: () => _calculate('/'),
+                  child: const Text('/'),
                 ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '4';
-                    });
-                  },
+                  onPressed: () => _calculate('4'),
                   child: const Text('4'),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '5';
-                    });
-                  },
+                  onPressed: () => _calculate('5'),
                   child: const Text('5'),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '6';
-                    });
-                  },
+                  onPressed: () => _calculate('6'),
                   child: const Text('6'),
                 ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '1';
-                    });
-                  },
+                  onPressed: () => _calculate('*'),
+                  child: const Text('*'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _calculate('1'),
                   child: const Text('1'),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '2';
-                    });
-                  },
+                  onPressed: () => _calculate('2'),
                   child: const Text('2'),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '3';
-                    });
-                  },
+                  onPressed: () => _calculate('3'),
                   child: const Text('3'),
                 ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '0';
-                    });
-                  },
+                  onPressed: () => _calculate('-'),
+                  child: const Text('-'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _calculate('0'),
                   child: const Text('0'),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _controller.text += '.';
-                    });
-                  },
+                  onPressed: () => _calculate('.'),
                   child: const Text('.'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _calculate('='),
+                  child: const Text('='),
+                ),
+                ElevatedButton(
+                  onPressed: () => _calculate('+'),
+                  child: const Text('+'),
                 ),
               ],
             ),
