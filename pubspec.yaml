@@ -1,4 +1,5 @@
 name: simple_calculator
+description: A simple calculator app
 version: 1.0.0+1
 
 environment:
@@ -6,6 +7,10 @@ environment:
 
 dependencies:
   flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
     sdk: flutter
 
 flutter:
