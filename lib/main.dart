@@ -55,7 +55,7 @@ class _CalculatorState extends State<Calculator> {
           .split(' ')
           .map((e) => double.parse(e))
           .reduce((a, b) => a + b)
-          .toString();
+          .toStringAsFixed(2);
     } catch (e) {
       return 'Error';
     }
@@ -68,8 +68,8 @@ class _CalculatorState extends State<Calculator> {
         children: [
           Expanded(
             child: Container(
-              alignment: Alignment.bottomRight,
               padding: const EdgeInsets.all(20),
+              alignment: Alignment.bottomRight,
               child: Text(
                 _result.isEmpty ? _currentInput : _result,
                 style: const TextStyle(fontSize: 30),
@@ -111,7 +111,7 @@ class _CalculatorState extends State<Calculator> {
     return GestureDetector(
       onTap: () => _onButtonPressed(value),
       child: Container(
-        margin: const EdgeInsets.all(5),
+        margin: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.blue,
           borderRadius: BorderRadius.circular(10),
