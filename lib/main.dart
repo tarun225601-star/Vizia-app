@@ -24,102 +24,37 @@ class CalculatorPage extends StatefulWidget {
 }
 
 class _CalculatorPageState extends State<CalculatorPage> {
-  final _controller = TextEditingController(text: '0');
+  final _controller = TextEditingController();
   double _result = 0;
-  String _operation = '';
-  double _num1 = 0;
-  double _num2 = 0;
-
-  void _calculate(String operation) {
-    setState(() {
-      _num1 = double.parse(_controller.text);
-      _operation = operation;
-    });
-  }
-
-  void _equals() {
-    setState(() {
-      _num2 = double.parse(_controller.text);
-      switch (_operation) {
-        case '+':
-          _result = _num1 + _num2;
-          break;
-        case '-':
-          _result = _num1 - _num2;
-          break;
-        case '*':
-          _result = _num1 * _num2;
-          break;
-        case '/':
-          _result = _num1 / _num2;
-          break;
-      }
-      _controller.text = _result.toString();
-    });
-  }
-
-  void _clear() {
-    setState(() {
-      _controller.text = '0';
-      _result = 0;
-      _operation = '';
-      _num1 = 0;
-      _num2 = 0;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calculator App'),
+        title: const Text('Calculator'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
             TextField(
               controller: _controller,
-              readOnly: true,
-              textAlign: TextAlign.right,
-              style: const TextStyle(fontSize: 24),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Enter a number',
+              ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () => _calculate('+'),
-                  child: const Text('+'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _calculate('-'),
-                  child: const Text('-'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _calculate('*'),
-                  child: const Text('*'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _calculate('/'),
-                  child: const Text('/'),
-                ),
-              ],
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _result = double.parse(_controller.text);
+                });
+              },
+              child: const Text('Calculate'),
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: _equals,
-                  child: const Text('='),
-                ),
-                ElevatedButton(
-                  onPressed: _clear,
-                  child: const Text('Clear'),
-                ),
-              ],
-            ),
+            const SizedBox(height: 20),
+            Text('Result: $_result'),
           ],
         ),
       ),
