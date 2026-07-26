@@ -25,23 +25,54 @@ class CalculatorPage extends StatefulWidget {
 
 class _CalculatorPageState extends State<CalculatorPage> {
   final _controller = TextEditingController(text: '0');
-  double? _result;
+  double _result = 0;
+  String _operation = '';
+  double _num1 = 0;
+  double _num2 = 0;
 
-  void _calculate(String expression) {
-    try {
-      _result = double.parse(expression);
-      setState(() {});
-    } catch (e) {
-      _result = null;
-      setState(() {});
-    }
+  void _calculate(String operation) {
+    setState(() {
+      _num1 = double.parse(_controller.text);
+      _operation = operation;
+    });
+  }
+
+  void _equals() {
+    setState(() {
+      _num2 = double.parse(_controller.text);
+      switch (_operation) {
+        case '+':
+          _result = _num1 + _num2;
+          break;
+        case '-':
+          _result = _num1 - _num2;
+          break;
+        case '*':
+          _result = _num1 * _num2;
+          break;
+        case '/':
+          _result = _num1 / _num2;
+          break;
+      }
+      _controller.text = _result.toString();
+    });
+  }
+
+  void _clear() {
+    setState(() {
+      _controller.text = '0';
+      _result = 0;
+      _operation = '';
+      _num1 = 0;
+      _num2 = 0;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calculator'),
+        title: const Text('Calculator App'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -50,19 +81,45 @@ class _CalculatorPageState extends State<CalculatorPage> {
             TextField(
               controller: _controller,
               readOnly: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
+              textAlign: TextAlign.right,
+              style: const TextStyle(fontSize: 24),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                _calculate(_controller.text);
-              },
-              child: const Text('Calculate'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => _calculate('+'),
+                  child: const Text('+'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _calculate('-'),
+                  child: const Text('-'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _calculate('*'),
+                  child: const Text('*'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _calculate('/'),
+                  child: const Text('/'),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
-            Text(_result != null ? 'Result: $_result' : 'Error'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: _equals,
+                  child: const Text('='),
+                ),
+                ElevatedButton(
+                  onPressed: _clear,
+                  child: const Text('Clear'),
+                ),
+              ],
+            ),
           ],
         ),
       ),
