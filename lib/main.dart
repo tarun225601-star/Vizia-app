@@ -10,20 +10,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'Calculator App',
-      home: CalculatorPage(),
+      title: 'Calculator',
+      home: Calculator(),
     );
   }
 }
 
-class CalculatorPage extends StatefulWidget {
-  const CalculatorPage({Key? key}) : super(key: key);
+class Calculator extends StatefulWidget {
+  const Calculator({Key? key}) : super(key: key);
 
   @override
-  State<CalculatorPage> createState() => _CalculatorPageState();
+  State<Calculator> createState() => _CalculatorState();
 }
 
-class _CalculatorPageState extends State<CalculatorPage> {
+class _CalculatorState extends State<Calculator> {
   String _currentInput = '';
   String _result = '';
 
@@ -47,11 +47,11 @@ class _CalculatorPageState extends State<CalculatorPage> {
   double _calculate(String input) {
     try {
       return Function.apply(
-        (String input) => double.parse(input),
-        [input],
+        {'+': (a, b) => a + b, '-': (a, b) => a - b, '*': (a, b) => a * b, '/': (a, b) => a / b}[input.contains('+') ? '+' : input.contains('-') ? '-' : input.contains('*') ? '*' : '/'],
+        [double.parse(input.split(RegExp('[+\-*/]'))[0]), double.parse(input.split(RegExp('[+\-*/]'))[1])],
       );
     } catch (e) {
-      return 0;
+      throw Exception('Invalid input');
     }
   }
 
@@ -62,11 +62,11 @@ class _CalculatorPageState extends State<CalculatorPage> {
         children: [
           Expanded(
             child: Container(
-              padding: const EdgeInsets.all(20),
               alignment: Alignment.bottomRight,
+              padding: const EdgeInsets.all(16.0),
               child: Text(
                 _result.isEmpty ? _currentInput : _result,
-                style: const TextStyle(fontSize: 40),
+                style: const TextStyle(fontSize: 48),
               ),
             ),
           ),
@@ -76,46 +76,66 @@ class _CalculatorPageState extends State<CalculatorPage> {
               crossAxisCount: 4,
               childAspectRatio: 1.2,
               children: [
-                _buildButton('7'),
-                _buildButton('8'),
-                _buildButton('9'),
-                _buildButton('/'),
-                _buildButton('4'),
-                _buildButton('5'),
-                _buildButton('6'),
-                _buildButton('*'),
-                _buildButton('1'),
-                _buildButton('2'),
-                _buildButton('3'),
-                _buildButton('-'),
-                _buildButton('0'),
-                _buildButton('.'),
-                _buildButton('='),
-                _buildButton('+'),
-                _buildButton('C'),
+                ...['7', '8', '9', '/'].map((e) => InkWell(
+                  onTap: () => _onButtonPressed(e),
+                  child: Container(
+                    margin: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Center(child: Text(e, style: const TextStyle(fontSize: 24))),
+                  ),
+                )),
+                ...['4', '5', '6', '*'].map((e) => InkWell(
+                  onTap: () => _onButtonPressed(e),
+                  child: Container(
+                    margin: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Center(child: Text(e, style: const TextStyle(fontSize: 24))),
+                  ),
+                )),
+                ...['1', '2', '3', '-'].map((e) => InkWell(
+                  onTap: () => _onButtonPressed(e),
+                  child: Container(
+                    margin: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Center(child: Text(e, style: const TextStyle(fontSize: 24))),
+                  ),
+                )),
+                ...['0', '.', '=', '+'].map((e) => InkWell(
+                  onTap: () => _onButtonPressed(e),
+                  child: Container(
+                    margin: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Center(child: Text(e, style: const TextStyle(fontSize: 24))),
+                  ),
+                )),
+                InkWell(
+                  onTap: () => _onButtonPressed('C'),
+                  child: Container(
+                    margin: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(),
+                      borderRadius: BorderRadius.circular(16),
+                      color: Colors.red,
+                    ),
+                    child: const Center(child: Text('C', style: TextStyle(fontSize: 24, color: Colors.white))),
+                  ),
+                ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildButton(String value) {
-    return GestureDetector(
-      onTap: () => _onButtonPressed(value),
-      child: Container(
-        margin: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.blue,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Center(
-          child: Text(
-            value,
-            style: const TextStyle(fontSize: 24, color: Colors.white),
-          ),
-        ),
       ),
     );
   }
