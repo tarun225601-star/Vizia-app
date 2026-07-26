@@ -1,45 +1,35 @@
 import 'package:flutter/material.dart';
-
 class Calculator extends StatefulWidget {
   const Calculator({Key? key}) : super(key: key);
-
   @override
   State<Calculator> createState() => _CalculatorState();
 }
-
 class _CalculatorState extends State<Calculator> {
-  String _expression = '';
+  String _currentInput = '';
   String _result = '';
-
-  void _onPressed(String value) {
+  void _onButtonPressed(String value) {
     setState(() {
-      if (value == '=') {
-        _result = _calculate(_expression);
-        _expression = '';
-      } else if (value == 'C') {
-        _expression = '';
+      if (value == 'C') {
+        _currentInput = '';
         _result = '';
+      } else if (value == '=') {
+        try {
+          _result = _calculate(_currentInput);
+        } catch (e) {
+          _result = 'Error';
+        }
       } else {
-        _expression += value;
+        _currentInput += value;
       }
     });
   }
-
-  String _calculate(String expression) {
+  String _calculate(String input) {
     try {
-      return expression
-          .replaceAll(' ', '')
-          .replaceAll('+', ' + ')
-          .replaceAll('-', ' - ')
-          .replaceAll('*', ' * ')
-          .replaceAll('/', ' / ')
-          .split(' ').join()
-          .toString();
+      return (Function.apply(eval, [input])).toString();
     } catch (e) {
       return 'Error';
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,23 +38,15 @@ class _CalculatorState extends State<Calculator> {
           Expanded(
             child: Container(
               padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    _expression,
-                    style: const TextStyle(fontSize: 24),
-                  ),
-                  Text(
-                    _result,
-                    style: const TextStyle(fontSize: 48),
-                  ),
-                ],
+              alignment: Alignment.bottomRight,
+              child: Text(
+                _result.isEmpty ? _currentInput : _result,
+                style: const TextStyle(fontSize: 40),
               ),
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 3,
             child: GridView.count(
               crossAxisCount: 4,
               childAspectRatio: 1.2,
@@ -93,13 +75,21 @@ class _CalculatorState extends State<Calculator> {
       ),
     );
   }
-
   Widget _buildButton(String value) {
-    return ElevatedButton(
-      onPressed: () => _onPressed(value),
-      child: Text(
-        value,
-        style: const TextStyle(fontSize: 24),
+    return GestureDetector(
+      onTap: () => _onButtonPressed(value),
+      child: Container(
+        margin: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Center(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 24),
+          ),
+        ),
       ),
     );
   }
