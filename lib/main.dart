@@ -24,32 +24,14 @@ class Calculator extends StatefulWidget {
 }
 
 class _CalculatorState extends State<Calculator> {
-  String _expression = '';
-  String _result = '';
+  final _controller = TextEditingController();
+  double? _result;
+  String? _error;
 
-  void _onPressed(String value) {
-    setState(() {
-      if (value == '=') {
-        try {
-          _result = _calculate(_expression);
-        } catch (e) {
-          _result = 'Error';
-        }
-      } else if (value == 'C') {
-        _expression = '';
-        _result = '';
-      } else {
-        _expression += value;
-      }
-    });
-  }
-
-  String _calculate(String expression) {
-    try {
-      return (Function.apply(eval, [expression])).toString();
-    } catch (e) {
-      return 'Error';
-    }
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -58,51 +40,46 @@ class _CalculatorState extends State<Calculator> {
       appBar: AppBar(
         title: const Text('Simple Calculator'),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Container(
-              alignment: Alignment.bottomRight,
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                _expression + (_result.isEmpty ? '' : '= $_result'),
-                style: const TextStyle(fontSize: 24),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _controller,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Enter calculation',
               ),
             ),
-          ),
-          GridView.count(
-            shrinkWrap: true,
-            crossAxisCount: 4,
-            childAspectRatio: 1.2,
-            children: [
-              _buildButton('7'),
-              _buildButton('8'),
-              _buildButton('9'),
-              _buildButton('/'),
-              _buildButton('4'),
-              _buildButton('5'),
-              _buildButton('6'),
-              _buildButton('*'),
-              _buildButton('1'),
-              _buildButton('2'),
-              _buildButton('3'),
-              _buildButton('-'),
-              _buildButton('0'),
-              _buildButton('.'),
-              _buildButton('='),
-              _buildButton('C'),
-              _buildButton('+'),
-            ],
-          ),
-        ],
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                try {
+                  final result = _calculate(_controller.text);
+                  setState(() {
+                    _result = result;
+                    _error = null;
+                  });
+                } catch (e) {
+                  setState(() {
+                    _result = null;
+                    _error = e.toString();
+                  });
+                }
+              },
+              child: const Text('Calculate'),
+            ),
+            const SizedBox(height: 16),
+            Text(_result != null ? 'Result: $_result' : 'Error: $_error'),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildButton(String value) {
-    return ElevatedButton(
-      onPressed: () => _onPressed(value),
-      child: Text(value),
-    );
+  double _calculate(String calculation) {
+    // Implement calculation logic here
+    // For example, let's just parse the string as a double
+    return double.parse(calculation);
   }
 }
