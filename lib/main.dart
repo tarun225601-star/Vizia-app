@@ -34,7 +34,7 @@ class _CalculatorState extends State<Calculator> {
         _result = '';
       } else if (value == '=') {
         try {
-          _result = _calculate(_currentInput);
+          _result = _calculate(_currentInput).toString();
         } catch (e) {
           _result = 'Error';
         }
@@ -44,20 +44,11 @@ class _CalculatorState extends State<Calculator> {
     });
   }
 
-  String _calculate(String input) {
+  double _calculate(String input) {
     try {
-      return input
-          .replaceAll(' ', '')
-          .replaceAll('+', ' + ')
-          .replaceAll('-', ' - ')
-          .replaceAll('*', ' * ')
-          .replaceAll('/', ' / ')
-          .split(' ')
-          .map((e) => double.parse(e))
-          .reduce((a, b) => a + b)
-          .toStringAsFixed(2);
+      return Function.apply(double.parse, [input]);
     } catch (e) {
-      return 'Error';
+      throw Exception('Invalid input');
     }
   }
 
@@ -72,7 +63,7 @@ class _CalculatorState extends State<Calculator> {
               alignment: Alignment.bottomRight,
               child: Text(
                 _result.isEmpty ? _currentInput : _result,
-                style: const TextStyle(fontSize: 30),
+                style: const TextStyle(fontSize: 40),
               ),
             ),
           ),
@@ -111,15 +102,15 @@ class _CalculatorState extends State<Calculator> {
     return GestureDetector(
       onTap: () => _onButtonPressed(value),
       child: Container(
-        margin: const EdgeInsets.all(10),
+        margin: const EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: Colors.blue,
-          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey),
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
         ),
         child: Center(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 20, color: Colors.white),
+            style: const TextStyle(fontSize: 24),
           ),
         ),
       ),
