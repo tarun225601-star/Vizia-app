@@ -71,17 +71,7 @@ class _CalculatorState extends State<Calculator> {
               padding: const EdgeInsets.all(20),
               alignment: Alignment.bottomRight,
               child: Text(
-                _currentInput.isEmpty ? '0' : _currentInput,
-                style: const TextStyle(fontSize: 30),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              alignment: Alignment.bottomRight,
-              child: Text(
-                _result.isEmpty ? '0' : _result,
+                _result.isEmpty ? _currentInput : _result,
                 style: const TextStyle(fontSize: 30),
               ),
             ),
@@ -121,7 +111,7 @@ class _CalculatorState extends State<Calculator> {
     return GestureDetector(
       onTap: () => _onButtonPressed(value),
       child: Container(
-        margin: const EdgeInsets.all(10),
+        margin: const EdgeInsets.all(5),
         decoration: BoxDecoration(
           color: Colors.blue,
           borderRadius: BorderRadius.circular(10),
@@ -129,7 +119,7 @@ class _CalculatorState extends State<Calculator> {
         child: Center(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 20, color: Colors.white),
+            style: const TextStyle(fontSize: 24, color: Colors.white),
           ),
         ),
       ),
