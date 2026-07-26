@@ -34,7 +34,7 @@ class _CalculatorState extends State<Calculator> {
         _result = '';
       } else if (value == '=') {
         try {
-          _result = _calculate(_currentInput);
+          _result = _calculate(_currentInput).toString();
         } catch (e) {
           _result = 'Error';
         }
@@ -44,20 +44,14 @@ class _CalculatorState extends State<Calculator> {
     });
   }
 
-  String _calculate(String input) {
+  double _calculate(String input) {
     try {
-      return input
-          .replaceAll(' ', '')
-          .replaceAll('+', ' + ')
-          .replaceAll('-', ' - ')
-          .replaceAll('*', ' * ')
-          .replaceAll('/', ' / ')
-          .split(' ')
-          .map((e) => double.parse(e))
-          .reduce((a, b) => a + b)
-          .toString();
+      return Function.apply(
+        {'+': (a, b) => a + b, '-': (a, b) => a - b, '*': (a, b) => a * b, '/': (a, b) => a / b}[input.contains('+') ? '+' : input.contains('-') ? '-' : input.contains('*') ? '*' : '/'],
+        [double.parse(input.split('+').first), double.parse(input.split('+').last)],
+      );
     } catch (e) {
-      return 'Error';
+      rethrow;
     }
   }
 
@@ -68,11 +62,11 @@ class _CalculatorState extends State<Calculator> {
         children: [
           Expanded(
             child: Container(
-              padding: const EdgeInsets.all(20),
               alignment: Alignment.bottomRight,
+              padding: const EdgeInsets.all(16.0),
               child: Text(
                 _result.isEmpty ? _currentInput : _result,
-                style: const TextStyle(fontSize: 30),
+                style: const TextStyle(fontSize: 48),
               ),
             ),
           ),
@@ -111,15 +105,15 @@ class _CalculatorState extends State<Calculator> {
     return GestureDetector(
       onTap: () => _onButtonPressed(value),
       child: Container(
-        margin: const EdgeInsets.all(10),
+        margin: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
           color: Colors.blue,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(16.0),
         ),
         child: Center(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 20, color: Colors.white),
+            style: const TextStyle(fontSize: 24, color: Colors.white),
           ),
         ),
       ),
