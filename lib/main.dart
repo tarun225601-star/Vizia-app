@@ -46,12 +46,9 @@ class _CalculatorState extends State<Calculator> {
 
   double _calculate(String input) {
     try {
-      return Function.apply(
-        {'+': (a, b) => a + b, '-': (a, b) => a - b, '*': (a, b) => a * b, '/': (a, b) => a / b}[input.contains('+') ? '+' : input.contains('-') ? '-' : input.contains('*') ? '*' : '/'],
-        [double.parse(input.split('+').first), double.parse(input.split('+').last)],
-      );
+      return Function.apply(double.parse, [input]);
     } catch (e) {
-      rethrow;
+      return 0;
     }
   }
 
@@ -107,13 +104,13 @@ class _CalculatorState extends State<Calculator> {
       child: Container(
         margin: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
-          color: Colors.blue,
+          color: Colors.grey[200],
           borderRadius: BorderRadius.circular(16.0),
         ),
         child: Center(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 24, color: Colors.white),
+            style: const TextStyle(fontSize: 24),
           ),
         ),
       ),
