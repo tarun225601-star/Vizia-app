@@ -10,16 +10,10 @@ android {
     versionCode 1
     versionName "1.0"
   }
-  buildTypes {
-    release {
-      minifyEnabled true
-      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-    }
-  }
 }
 
 dependencies {
-  implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.7.20'
   implementation 'androidx.core:core:1.9.0'
-  implementation 'androidx.appcompat:appcompat:1.5.1'
+  implementation 'androidx.appcompat:appcompat:1.6.1'
+  implementation 'com.google.android.material:material:1.8.0'
 }
