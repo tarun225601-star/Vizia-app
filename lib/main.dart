@@ -24,37 +24,45 @@ class CalculatorPage extends StatefulWidget {
 }
 
 class _CalculatorPageState extends State<CalculatorPage> {
-  final _controller = TextEditingController();
-  double _result = 0;
+  final _controller = TextEditingController(text: '0');
+  double? _result;
+
+  void _calculate(String expression) {
+    try {
+      _result = double.parse(expression);
+      setState(() {});
+    } catch (e) {
+      _result = null;
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calculator App'),
+        title: const Text('Calculator'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
               controller: _controller,
+              readOnly: true,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Enter a number',
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                setState(() {
-                  _result = double.parse(_controller.text);
-                });
+                _calculate(_controller.text);
               },
               child: const Text('Calculate'),
             ),
-            const SizedBox(height: 20),
-            Text('Result: $_result'),
+            const SizedBox(height: 16),
+            Text(_result != null ? 'Result: $_result' : 'Error'),
           ],
         ),
       ),
