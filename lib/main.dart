@@ -1,50 +1,50 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const CalculatorApp());
+  runApp(const MyApp());
 }
 
-class CalculatorApp extends StatelessWidget {
-  const CalculatorApp({Key? key}) : super(key: key);
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Calculator',
-      home: CalculatorPage(),
+      home: Calculator(),
     );
   }
 }
 
-class CalculatorPage extends StatefulWidget {
-  const CalculatorPage({Key? key}) : super(key: key);
+class Calculator extends StatefulWidget {
+  const Calculator({Key? key}) : super(key: key);
 
   @override
-  State<CalculatorPage> createState() => _CalculatorPageState();
+  State<Calculator> createState() => _CalculatorState();
 }
 
-class _CalculatorPageState extends State<CalculatorPage> {
+class _CalculatorState extends State<Calculator> {
   String _currentInput = '';
   String _result = '';
 
-  void _onButtonPressed(String buttonValue) {
+  void _onButtonPressed(String value) {
     setState(() {
-      if (buttonValue == 'C') {
+      if (value == 'C') {
         _currentInput = '';
         _result = '';
-      } else if (buttonValue == '=') {
+      } else if (value == '=') {
         try {
-          _result = _calculateResult(_currentInput);
+          _result = _calculate(_currentInput);
         } catch (e) {
           _result = 'Error';
         }
       } else {
-        _currentInput += buttonValue;
+        _currentInput += value;
       }
     });
   }
 
-  String _calculateResult(String input) {
+  String _calculate(String input) {
     try {
       return input
           .replaceAll(' ', '')
@@ -54,19 +54,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
           .replaceAll('/', ' / ')
           .split(' ')
           .map((e) => double.parse(e))
-          .reduce((value, element) {
-            if (input.contains('+')) {
-              return (value + element).toString();
-            } else if (input.contains('-')) {
-              return (value - element).toString();
-            } else if (input.contains('*')) {
-              return (value * element).toString();
-            } else if (input.contains('/')) {
-              return (value / element).toString();
-            } else {
-              return '0';
-            }
-          })
+          .reduce((a, b) => a + b)
           .toString();
     } catch (e) {
       return 'Error';
@@ -80,20 +68,10 @@ class _CalculatorPageState extends State<CalculatorPage> {
         children: [
           Expanded(
             child: Container(
-              padding: const EdgeInsets.all(20),
               alignment: Alignment.bottomRight,
-              child: Text(
-                _currentInput.isEmpty ? '0' : _currentInput,
-                style: const TextStyle(fontSize: 30),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Container(
               padding: const EdgeInsets.all(20),
-              alignment: Alignment.bottomRight,
               child: Text(
-                _result.isEmpty ? '0' : _result,
+                _result.isEmpty ? _currentInput : _result,
                 style: const TextStyle(fontSize: 30),
               ),
             ),
@@ -104,78 +82,46 @@ class _CalculatorPageState extends State<CalculatorPage> {
               crossAxisCount: 4,
               childAspectRatio: 1.2,
               children: [
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('7'),
-                  child: const Text('7'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('8'),
-                  child: const Text('8'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('9'),
-                  child: const Text('9'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('/'),
-                  child: const Text('/'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('4'),
-                  child: const Text('4'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('5'),
-                  child: const Text('5'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('6'),
-                  child: const Text('6'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('*'),
-                  child: const Text('*'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('1'),
-                  child: const Text('1'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('2'),
-                  child: const Text('2'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('3'),
-                  child: const Text('3'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('-'),
-                  child: const Text('-'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('0'),
-                  child: const Text('0'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('.'),
-                  child: const Text('.'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('='),
-                  child: const Text('='),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('+'),
-                  child: const Text('+'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _onButtonPressed('C'),
-                  child: const Text('C'),
-                ),
+                _buildButton('7'),
+                _buildButton('8'),
+                _buildButton('9'),
+                _buildButton('/'),
+                _buildButton('4'),
+                _buildButton('5'),
+                _buildButton('6'),
+                _buildButton('*'),
+                _buildButton('1'),
+                _buildButton('2'),
+                _buildButton('3'),
+                _buildButton('-'),
+                _buildButton('0'),
+                _buildButton('.'),
+                _buildButton('='),
+                _buildButton('+'),
+                _buildButton('C'),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildButton(String value) {
+    return GestureDetector(
+      onTap: () => _onButtonPressed(value),
+      child: Container(
+        margin: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: Colors.blue,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Center(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 20, color: Colors.white),
+          ),
+        ),
       ),
     );
   }
