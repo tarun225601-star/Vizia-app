@@ -24,151 +24,37 @@ class CalculatorPage extends StatefulWidget {
 }
 
 class _CalculatorPageState extends State<CalculatorPage> {
-  final _controller = TextEditingController(text: '0');
+  final _controller = TextEditingController();
   double _result = 0;
-  String _operator = '';
-  double _num1 = 0;
-  double _num2 = 0;
-
-  void _calculate(String operator) {
-    setState(() {
-      _num1 = double.parse(_controller.text);
-      _operator = operator;
-      _controller.clear();
-    });
-  }
-
-  void _equal() {
-    setState(() {
-      _num2 = double.parse(_controller.text);
-      switch (_operator) {
-        case '+':
-          _result = _num1 + _num2;
-          break;
-        case '-':
-          _result = _num1 - _num2;
-          break;
-        case '*':
-          _result = _num1 * _num2;
-          break;
-        case '/':
-          _result = _num1 / _num2;
-          break;
-      }
-      _controller.text = _result.toString();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calculator App'),
+        title: const Text('Calculator'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
             TextField(
               controller: _controller,
-              readOnly: true,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
+                labelText: 'Enter a number',
               ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () => _controller.text += '7',
-                  child: const Text('7'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _controller.text += '8',
-                  child: const Text('8'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _controller.text += '9',
-                  child: const Text('9'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _calculate('/'),
-                  child: const Text('/'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () => _controller.text += '4',
-                  child: const Text('4'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _controller.text += '5',
-                  child: const Text('5'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _controller.text += '6',
-                  child: const Text('6'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _calculate('*'),
-                  child: const Text('*'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () => _controller.text += '1',
-                  child: const Text('1'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _controller.text += '2',
-                  child: const Text('2'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _controller.text += '3',
-                  child: const Text('3'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _calculate('-'),
-                  child: const Text('-'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () => _controller.text += '0',
-                  child: const Text('0'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _controller.clear(),
-                  child: const Text('C'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _controller.text += '.',
-                  child: const Text('.'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _calculate('+'),
-                  child: const Text('+'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _equal,
-              child: const Text('='),
+              onPressed: () {
+                setState(() {
+                  _result = double.parse(_controller.text);
+                });
+              },
+              child: const Text('Calculate'),
             ),
+            const SizedBox(height: 20),
+            Text('Result: $_result'),
           ],
         ),
       ),
