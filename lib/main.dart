@@ -27,22 +27,40 @@ class _CalculatorState extends State<Calculator> {
   final _controller = TextEditingController(text: '0');
   double _result = 0;
   String _operation = '';
+  double _num1 = 0;
+  double _num2 = 0;
 
-  void _calculate(String operation) {
+  void _calculate() {
     setState(() {
-      if (operation == '=') {
-        _result = _calculateResult(_controller.text);
-        _controller.text = _result.toString();
-      } else {
-        _operation = operation;
-        _controller.text += operation;
+      _num1 = double.parse(_controller.text);
+      switch (_operation) {
+        case '+':
+          _result = _num1 + _num2;
+          break;
+        case '-':
+          _result = _num1 - _num2;
+          break;
+        case '*':
+          _result = _num1 * _num2;
+          break;
+        case '/':
+          _result = _num1 / _num2;
+          break;
+        default:
+          _result = 0;
       }
+      _controller.text = _result.toString();
     });
   }
 
-  double _calculateResult(String expression) {
-    // Implement your calculation logic here
-    return 0;
+  void _clear() {
+    setState(() {
+      _controller.text = '0';
+      _result = 0;
+      _operation = '';
+      _num1 = 0;
+      _num2 = 0;
+    });
   }
 
   @override
@@ -62,73 +80,150 @@ class _CalculatorState extends State<Calculator> {
               style: const TextStyle(fontSize: 24),
             ),
             const SizedBox(height: 16),
-            GridView.count(
-              shrinkWrap: true,
-              crossAxisCount: 4,
-              childAspectRatio: 1,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: () => _calculate('7'),
+                  onPressed: () {
+                    setState(() {
+                      _controller.text += '7';
+                    });
+                  },
                   child: const Text('7'),
                 ),
                 ElevatedButton(
-                  onPressed: () => _calculate('8'),
+                  onPressed: () {
+                    setState(() {
+                      _controller.text += '8';
+                    });
+                  },
                   child: const Text('8'),
                 ),
                 ElevatedButton(
-                  onPressed: () => _calculate('9'),
+                  onPressed: () {
+                    setState(() {
+                      _controller.text += '9';
+                    });
+                  },
                   child: const Text('9'),
                 ),
                 ElevatedButton(
-                  onPressed: () => _calculate('/'),
+                  onPressed: () {
+                    setState(() {
+                      _controller.text += '/';
+                      _operation = '/';
+                      _num2 = double.parse(_controller.text.substring(0, _controller.text.length - 1));
+                    });
+                  },
                   child: const Text('/'),
                 ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
                 ElevatedButton(
-                  onPressed: () => _calculate('4'),
+                  onPressed: () {
+                    setState(() {
+                      _controller.text += '4';
+                    });
+                  },
                   child: const Text('4'),
                 ),
                 ElevatedButton(
-                  onPressed: () => _calculate('5'),
+                  onPressed: () {
+                    setState(() {
+                      _controller.text += '5';
+                    });
+                  },
                   child: const Text('5'),
                 ),
                 ElevatedButton(
-                  onPressed: () => _calculate('6'),
+                  onPressed: () {
+                    setState(() {
+                      _controller.text += '6';
+                    });
+                  },
                   child: const Text('6'),
                 ),
                 ElevatedButton(
-                  onPressed: () => _calculate('*'),
+                  onPressed: () {
+                    setState(() {
+                      _controller.text += '*';
+                      _operation = '*';
+                      _num2 = double.parse(_controller.text.substring(0, _controller.text.length - 1));
+                    });
+                  },
                   child: const Text('*'),
                 ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
                 ElevatedButton(
-                  onPressed: () => _calculate('1'),
+                  onPressed: () {
+                    setState(() {
+                      _controller.text += '1';
+                    });
+                  },
                   child: const Text('1'),
                 ),
                 ElevatedButton(
-                  onPressed: () => _calculate('2'),
+                  onPressed: () {
+                    setState(() {
+                      _controller.text += '2';
+                    });
+                  },
                   child: const Text('2'),
                 ),
                 ElevatedButton(
-                  onPressed: () => _calculate('3'),
+                  onPressed: () {
+                    setState(() {
+                      _controller.text += '3';
+                    });
+                  },
                   child: const Text('3'),
                 ),
                 ElevatedButton(
-                  onPressed: () => _calculate('-'),
+                  onPressed: () {
+                    setState(() {
+                      _controller.text += '-';
+                      _operation = '-';
+                      _num2 = double.parse(_controller.text.substring(0, _controller.text.length - 1));
+                    });
+                  },
                   child: const Text('-'),
                 ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
                 ElevatedButton(
-                  onPressed: () => _calculate('0'),
+                  onPressed: () {
+                    setState(() {
+                      _controller.text += '0';
+                    });
+                  },
                   child: const Text('0'),
                 ),
                 ElevatedButton(
-                  onPressed: () => _calculate('.'),
-                  child: const Text('.'),
+                  onPressed: _clear,
+                  child: const Text('C'),
                 ),
                 ElevatedButton(
-                  onPressed: () => _calculate('='),
+                  onPressed: _calculate,
                   child: const Text('='),
                 ),
                 ElevatedButton(
-                  onPressed: () => _calculate('+'),
+                  onPressed: () {
+                    setState(() {
+                      _controller.text += '+';
+                      _operation = '+';
+                      _num2 = double.parse(_controller.text.substring(0, _controller.text.length - 1));
+                    });
+                  },
                   child: const Text('+'),
                 ),
               ],
