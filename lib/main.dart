@@ -34,7 +34,7 @@ class _CalculatorState extends State<Calculator> {
         _result = '';
       } else if (value == '=') {
         try {
-          _result = _calculate(_currentInput).toString();
+          _result = _calculate(_currentInput);
         } catch (e) {
           _result = 'Error';
         }
@@ -44,34 +44,21 @@ class _CalculatorState extends State<Calculator> {
     });
   }
 
-  double _calculate(String input) {
+  String _calculate(String input) {
     try {
-      return Function.apply(
-        _getFunction(input),
-        _getArguments(input),
-      );
+      return input
+          .replaceAll(' ', '')
+          .replaceAll('+', ' + ')
+          .replaceAll('-', ' - ')
+          .replaceAll('*', ' * ')
+          .replaceAll('/', ' / ')
+          .split(' ')
+          .map((e) => double.parse(e))
+          .reduce((a, b) => a + b)
+          .toStringAsFixed(2);
     } catch (e) {
-      throw Exception('Invalid input');
+      return 'Error';
     }
-  }
-
-  Function _getFunction(String input) {
-    if (input.contains('+')) {
-      return (a, b) => a + b;
-    } else if (input.contains('-')) {
-      return (a, b) => a - b;
-    } else if (input.contains('*')) {
-      return (a, b) => a * b;
-    } else if (input.contains('/')) {
-      return (a, b) => a / b;
-    } else {
-      throw Exception('Invalid input');
-    }
-  }
-
-  List<double> _getArguments(String input) {
-    final parts = input.split(RegExp(r'[+\-*/]'));
-    return parts.map((e) => double.parse(e)).toList();
   }
 
   @override
@@ -100,7 +87,7 @@ class _CalculatorState extends State<Calculator> {
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 4,
             child: GridView.count(
               crossAxisCount: 4,
               childAspectRatio: 1.2,
@@ -142,7 +129,7 @@ class _CalculatorState extends State<Calculator> {
         child: Center(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 24, color: Colors.white),
+            style: const TextStyle(fontSize: 20, color: Colors.white),
           ),
         ),
       ),
