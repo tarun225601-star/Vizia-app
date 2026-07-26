@@ -24,52 +24,35 @@ class Calculator extends StatefulWidget {
 }
 
 class _CalculatorState extends State<Calculator> {
-  final _controller = TextEditingController(text: '0');
-  double? _currentValue;
-  String? _operation;
-  double? _previousValue;
+  String _currentInput = '';
+  String _result = '';
 
-  void _handleClick(String value) {
+  void _onButtonPressed(String value) {
     setState(() {
       if (value == 'C') {
-        _controller.text = '0';
-        _currentValue = null;
-        _operation = null;
-        _previousValue = null;
-      } else if (value == '+' || value == '-' || value == '*' || value == '/') {
-        _previousValue = double.parse(_controller.text);
-        _operation = value;
-        _controller.text = '0';
+        _currentInput = '';
+        _result = '';
       } else if (value == '=') {
-        if (_operation != null && _previousValue != null) {
-          _currentValue = double.parse(_controller.text);
-          switch (_operation) {
-            case '+':
-              _controller.text = (_previousValue! + _currentValue!).toString();
-              break;
-            case '-':
-              _controller.text = (_previousValue! - _currentValue!).toString();
-              break;
-            case '*':
-              _controller.text = (_previousValue! * _currentValue!).toString();
-              break;
-            case '/':
-              if (_currentValue! != 0) {
-                _controller.text = (_previousValue! / _currentValue!).toString();
-              } else {
-                _controller.text = 'Error';
-              }
-              break;
-          }
+        try {
+          _result = _calculate(_currentInput).toString();
+        } catch (e) {
+          _result = 'Error';
         }
       } else {
-        if (_controller.text == '0') {
-          _controller.text = value;
-        } else {
-          _controller.text += value;
-        }
+        _currentInput += value;
       }
     });
+  }
+
+  double _calculate(String input) {
+    try {
+      return Function.apply(
+        {'+': (a, b) => a + b, '-': (a, b) => a - b, '*': (a, b) => a * b, '/': (a, b) => a / b}[input.contains('+') ? '+' : input.contains('-') ? '-' : input.contains('*') ? '*' : '/'],
+        [double.parse(input.split('+').first), double.parse(input.split('+').last)],
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
@@ -81,9 +64,8 @@ class _CalculatorState extends State<Calculator> {
             child: Container(
               alignment: Alignment.bottomRight,
               padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                controller: _controller,
-                readOnly: true,
+              child: Text(
+                _result.isEmpty ? _currentInput : _result,
                 style: const TextStyle(fontSize: 48),
               ),
             ),
@@ -92,80 +74,48 @@ class _CalculatorState extends State<Calculator> {
             flex: 3,
             child: GridView.count(
               crossAxisCount: 4,
-              childAspectRatio: 1,
+              childAspectRatio: 1.2,
               children: [
-                ElevatedButton(
-                  onPressed: () => _handleClick('7'),
-                  child: const Text('7'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('8'),
-                  child: const Text('8'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('9'),
-                  child: const Text('9'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('/'),
-                  child: const Text('/'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('4'),
-                  child: const Text('4'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('5'),
-                  child: const Text('5'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('6'),
-                  child: const Text('6'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('*'),
-                  child: const Text('*'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('1'),
-                  child: const Text('1'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('2'),
-                  child: const Text('2'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('3'),
-                  child: const Text('3'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('-'),
-                  child: const Text('-'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('0'),
-                  child: const Text('0'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('.'),
-                  child: const Text('.'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('='),
-                  child: const Text('='),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('+'),
-                  child: const Text('+'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _handleClick('C'),
-                  child: const Text('C'),
-                ),
+                _buildButton('7'),
+                _buildButton('8'),
+                _buildButton('9'),
+                _buildButton('/'),
+                _buildButton('4'),
+                _buildButton('5'),
+                _buildButton('6'),
+                _buildButton('*'),
+                _buildButton('1'),
+                _buildButton('2'),
+                _buildButton('3'),
+                _buildButton('-'),
+                _buildButton('0'),
+                _buildButton('.'),
+                _buildButton('='),
+                _buildButton('+'),
+                _buildButton('C'),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildButton(String value) {
+    return GestureDetector(
+      onTap: () => _onButtonPressed(value),
+      child: Container(
+        margin: const EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+        ),
+        child: Center(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 24),
+          ),
+        ),
       ),
     );
   }
