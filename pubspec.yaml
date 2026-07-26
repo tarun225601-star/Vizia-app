@@ -1,6 +1,5 @@
 name: simple_calculator
 description: A simple calculator app
-
 version: 1.0.0+1
 
 environment:
