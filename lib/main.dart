@@ -25,13 +25,55 @@ class Calculator extends StatefulWidget {
 
 class _CalculatorState extends State<Calculator> {
   final _controller = TextEditingController();
-  double? _result;
-  String? _error;
+  String _result = '';
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void _calculate(String operator) {
+    setState(() {
+      if (operator == '=') {
+        _result = _calculateResult(_controller.text);
+      } else {
+        _controller.text += operator;
+      }
+    });
+  }
+
+  String _calculateResult(String expression) {
+    try {
+      return expression
+          .replaceAll(' ', '')
+          .split('
+')
+          .map((e) => e
+              .replaceAll('+', ' + ')
+              .replaceAll('-', ' - ')
+              .replaceAll('*', ' * ')
+              .replaceAll('/', ' / ')
+              .split(' ')
+              .map((e) => double.parse(e))
+              .reduce((value, element) {
+                switch (expression
+                    .replaceAll(' ', '')
+                    .split('
+')[0]
+                    .split(RegExp(r'\d+'))
+                    .last) {
+                  case '+':
+                    return value + element;
+                  case '-':
+                    return value - element;
+                  case '*':
+                    return value * element;
+                  case '/':
+                    return value / element;
+                  default:
+                    return 0;
+                }
+              }))
+          .join('
+');
+    } catch (e) {
+      return 'Error';
+    }
   }
 
   @override
@@ -48,38 +90,19 @@ class _CalculatorState extends State<Calculator> {
               controller: _controller,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Enter calculation',
+                hintText: 'Enter expression',
               ),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
-                try {
-                  final result = _calculate(_controller.text);
-                  setState(() {
-                    _result = result;
-                    _error = null;
-                  });
-                } catch (e) {
-                  setState(() {
-                    _result = null;
-                    _error = e.toString();
-                  });
-                }
-              },
+              onPressed: () => _calculate('='),
               child: const Text('Calculate'),
             ),
             const SizedBox(height: 16),
-            Text(_result != null ? 'Result: $_result' : 'Error: $_error'),
+            Text(_result),
           ],
         ),
       ),
     );
-  }
-
-  double _calculate(String calculation) {
-    // Implement calculation logic here
-    // For example, let's just parse the string as a double
-    return double.parse(calculation);
   }
 }
