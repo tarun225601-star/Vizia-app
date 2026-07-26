@@ -24,18 +24,8 @@ class CalculatorPage extends StatefulWidget {
 }
 
 class _CalculatorPageState extends State<CalculatorPage> {
-  final _controller = TextEditingController(text: '0');
+  final _controller = TextEditingController();
   double? _result;
-
-  void _calculate() {
-    try {
-      _result = double.parse(_controller.text);
-      setState(() {});
-    } catch (e) {
-      _result = null;
-      setState(() {});
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,31 +34,61 @@ class _CalculatorPageState extends State<CalculatorPage> {
         title: const Text('Calculator'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
             TextField(
               controller: _controller,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Enter a number',
+                labelText: 'Enter expression',
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _calculate,
+              onPressed: () {
+                try {
+                  _result = eval(_controller.text);
+                  setState(() {});
+                } catch (e) {
+                  _result = null;
+                  setState(() {});
+                }
+              },
               child: const Text('Calculate'),
             ),
-            const SizedBox(height: 16),
-            Text(
-              _result != null
-                  ? 'Result: $_result'
-                  : 'Invalid input',
-              style: const TextStyle(fontSize: 24),
-            ),
+            const SizedBox(height: 20),
+            Text(_result != null ? 'Result: $_result' : 'Result: ')
           ],
         ),
       ),
     );
+  }
+
+  double eval(String expression) {
+    // Simple expression evaluation, does not handle complex expressions
+    final parts = expression.split(' ');
+    if (parts.length != 3) {
+      throw Exception('Invalid expression');
+    }
+    final num1 = double.parse(parts[0]);
+    final operator = parts[1];
+    final num2 = double.parse(parts[2]);
+
+    switch (operator) {
+      case '+':
+        return num1 + num2;
+      case '-':
+        return num1 - num2;
+      case '*':
+        return num1 * num2;
+      case '/':
+        if (num2 == 0) {
+          throw Exception('Division by zero');
+        }
+        return num1 / num2;
+      default:
+        throw Exception('Invalid operator');
+    }
   }
 }
