@@ -24,35 +24,52 @@ class Calculator extends StatefulWidget {
 }
 
 class _CalculatorState extends State<Calculator> {
-  String _currentInput = '';
-  String _result = '';
+  final _controller = TextEditingController(text: '0');
+  double? _currentValue;
+  String? _operation;
+  double? _previousValue;
 
-  void _onButtonPressed(String value) {
+  void _handleClick(String value) {
     setState(() {
       if (value == 'C') {
-        _currentInput = '';
-        _result = '';
+        _controller.text = '0';
+        _currentValue = null;
+        _operation = null;
+        _previousValue = null;
+      } else if (value == '+' || value == '-' || value == '*' || value == '/') {
+        _previousValue = double.parse(_controller.text);
+        _operation = value;
+        _controller.text = '0';
       } else if (value == '=') {
-        try {
-          _result = _calculate(_currentInput).toString();
-        } catch (e) {
-          _result = 'Error';
+        if (_operation != null && _previousValue != null) {
+          _currentValue = double.parse(_controller.text);
+          switch (_operation) {
+            case '+':
+              _controller.text = (_previousValue! + _currentValue!).toString();
+              break;
+            case '-':
+              _controller.text = (_previousValue! - _currentValue!).toString();
+              break;
+            case '*':
+              _controller.text = (_previousValue! * _currentValue!).toString();
+              break;
+            case '/':
+              if (_currentValue! != 0) {
+                _controller.text = (_previousValue! / _currentValue!).toString();
+              } else {
+                _controller.text = 'Error';
+              }
+              break;
+          }
         }
       } else {
-        _currentInput += value;
+        if (_controller.text == '0') {
+          _controller.text = value;
+        } else {
+          _controller.text += value;
+        }
       }
     });
-  }
-
-  double _calculate(String input) {
-    try {
-      return Function.apply(
-        {'+': (a, b) => a + b, '-': (a, b) => a - b, '*': (a, b) => a * b, '/': (a, b) => a / b}[input.contains('+') ? '+' : input.contains('-') ? '-' : input.contains('*') ? '*' : '/'],
-        [double.parse(input.split('+').first), double.parse(input.split('+').last)],
-      );
-    } catch (e) {
-      throw Exception('Invalid input');
-    }
   }
 
   @override
@@ -64,8 +81,9 @@ class _CalculatorState extends State<Calculator> {
             child: Container(
               alignment: Alignment.bottomRight,
               padding: const EdgeInsets.all(16.0),
-              child: Text(
-                _result.isEmpty ? _currentInput : _result,
+              child: TextField(
+                controller: _controller,
+                readOnly: true,
                 style: const TextStyle(fontSize: 48),
               ),
             ),
@@ -74,87 +92,75 @@ class _CalculatorState extends State<Calculator> {
             flex: 3,
             child: GridView.count(
               crossAxisCount: 4,
-              childAspectRatio: 1.2,
+              childAspectRatio: 1,
               children: [
-                ...['7', '8', '9', '/'].map((e) => InkWell(
-                  onTap: () => _onButtonPressed(e),
-                  child: Container(
-                    margin: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(16.0),
-                    ),
-                    child: Center(
-                      child: Text(
-                        e,
-                        style: const TextStyle(fontSize: 24, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                )).toList(),
-                ...['4', '5', '6', '*'].map((e) => InkWell(
-                  onTap: () => _onButtonPressed(e),
-                  child: Container(
-                    margin: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(16.0),
-                    ),
-                    child: Center(
-                      child: Text(
-                        e,
-                        style: const TextStyle(fontSize: 24, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                )).toList(),
-                ...['1', '2', '3', '-'].map((e) => InkWell(
-                  onTap: () => _onButtonPressed(e),
-                  child: Container(
-                    margin: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(16.0),
-                    ),
-                    child: Center(
-                      child: Text(
-                        e,
-                        style: const TextStyle(fontSize: 24, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                )).toList(),
-                ...['0', '.', '=', '+'].map((e) => InkWell(
-                  onTap: () => _onButtonPressed(e),
-                  child: Container(
-                    margin: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(16.0),
-                    ),
-                    child: Center(
-                      child: Text(
-                        e,
-                        style: const TextStyle(fontSize: 24, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                )).toList(),
-                InkWell(
-                  onTap: () => _onButtonPressed('C'),
-                  child: Container(
-                    margin: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(16.0),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'C',
-                        style: TextStyle(fontSize: 24, color: Colors.white),
-                      ),
-                    ),
-                  ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('7'),
+                  child: const Text('7'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('8'),
+                  child: const Text('8'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('9'),
+                  child: const Text('9'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('/'),
+                  child: const Text('/'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('4'),
+                  child: const Text('4'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('5'),
+                  child: const Text('5'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('6'),
+                  child: const Text('6'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('*'),
+                  child: const Text('*'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('1'),
+                  child: const Text('1'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('2'),
+                  child: const Text('2'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('3'),
+                  child: const Text('3'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('-'),
+                  child: const Text('-'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('0'),
+                  child: const Text('0'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('.'),
+                  child: const Text('.'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('='),
+                  child: const Text('='),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('+'),
+                  child: const Text('+'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _handleClick('C'),
+                  child: const Text('C'),
                 ),
               ],
             ),
