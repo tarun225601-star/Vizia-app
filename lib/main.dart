@@ -34,7 +34,7 @@ class _CalculatorState extends State<Calculator> {
         _result = '';
       } else if (value == '=') {
         try {
-          _result = _calculate(_currentInput);
+          _result = _calculate(_currentInput).toString();
         } catch (e) {
           _result = 'Error';
         }
@@ -44,18 +44,46 @@ class _CalculatorState extends State<Calculator> {
     });
   }
 
-  String _calculate(String input) {
+  double _calculate(String input) {
     try {
-      return input
-          .replaceAll(' ', '')
-          .replaceAll('+', ' + ')
-          .replaceAll('-', ' - ')
-          .replaceAll('*', ' * ')
-          .replaceAll('/', ' / ')
-          .split(' ').join()
-          .toString();
+      return Function.apply(
+        _parseFunction(input),
+        _parseArguments(input),
+      );
     } catch (e) {
-      return 'Error';
+      throw Exception('Invalid input');
+    }
+  }
+
+  Function _parseFunction(String input) {
+    if (input.contains('+')) {
+      return (a, b) => a + b;
+    } else if (input.contains('-')) {
+      return (a, b) => a - b;
+    } else if (input.contains('*')) {
+      return (a, b) => a * b;
+    } else if (input.contains('/')) {
+      return (a, b) => a / b;
+    } else {
+      throw Exception('Invalid input');
+    }
+  }
+
+  List<double> _parseArguments(String input) {
+    if (input.contains('+')) {
+      final parts = input.split('+');
+      return parts.map((e) => double.parse(e)).toList();
+    } else if (input.contains('-')) {
+      final parts = input.split('-');
+      return parts.map((e) => double.parse(e)).toList();
+    } else if (input.contains('*')) {
+      final parts = input.split('*');
+      return parts.map((e) => double.parse(e)).toList();
+    } else if (input.contains('/')) {
+      final parts = input.split('/');
+      return parts.map((e) => double.parse(e)).toList();
+    } else {
+      throw Exception('Invalid input');
     }
   }
 
@@ -66,11 +94,21 @@ class _CalculatorState extends State<Calculator> {
         children: [
           Expanded(
             child: Container(
-              alignment: Alignment.bottomRight,
               padding: const EdgeInsets.all(20),
+              alignment: Alignment.bottomRight,
               child: Text(
-                _result.isEmpty ? _currentInput : _result,
-                style: const TextStyle(fontSize: 40),
+                _currentInput.isEmpty ? '0' : _currentInput,
+                style: const TextStyle(fontSize: 50),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              alignment: Alignment.bottomRight,
+              child: Text(
+                _result.isEmpty ? '' : _result,
+                style: const TextStyle(fontSize: 30),
               ),
             ),
           ),
@@ -109,18 +147,18 @@ class _CalculatorState extends State<Calculator> {
     return GestureDetector(
       onTap: () => _onButtonPressed(value),
       child: Container(
-        margin: const EdgeInsets.all(5),
+        margin: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey),
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
         ),
         child: Center(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 24),
+            style: const TextStyle(fontSize: 30),
           ),
         ),
       ),
     );
   }
-  }
+}
