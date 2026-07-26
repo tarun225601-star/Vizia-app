@@ -34,7 +34,7 @@ class _CalculatorState extends State<Calculator> {
         _result = '';
       } else if (value == '=') {
         try {
-          _result = _calculate(_currentInput).toString();
+          _result = _calculate(_currentInput);
         } catch (e) {
           _result = 'Error';
         }
@@ -44,46 +44,20 @@ class _CalculatorState extends State<Calculator> {
     });
   }
 
-  double _calculate(String input) {
+  String _calculate(String input) {
     try {
-      return Function.apply(
-        _parseFunction(input),
-        _parseArguments(input),
-      );
+      return input
+          .replaceAll(' ', '')
+          .replaceAll('+', ' + ')
+          .replaceAll('-', ' - ')
+          .replaceAll('*', ' * ')
+          .replaceAll('/', ' / ')
+          .split(' ')
+          .map((e) => double.parse(e))
+          .reduce((a, b) => a + b)
+          .toStringAsFixed(2);
     } catch (e) {
-      throw Exception('Invalid input');
-    }
-  }
-
-  Function _parseFunction(String input) {
-    if (input.contains('+')) {
-      return (a, b) => a + b;
-    } else if (input.contains('-')) {
-      return (a, b) => a - b;
-    } else if (input.contains('*')) {
-      return (a, b) => a * b;
-    } else if (input.contains('/')) {
-      return (a, b) => a / b;
-    } else {
-      throw Exception('Invalid input');
-    }
-  }
-
-  List<double> _parseArguments(String input) {
-    if (input.contains('+')) {
-      final parts = input.split('+');
-      return parts.map((e) => double.parse(e)).toList();
-    } else if (input.contains('-')) {
-      final parts = input.split('-');
-      return parts.map((e) => double.parse(e)).toList();
-    } else if (input.contains('*')) {
-      final parts = input.split('*');
-      return parts.map((e) => double.parse(e)).toList();
-    } else if (input.contains('/')) {
-      final parts = input.split('/');
-      return parts.map((e) => double.parse(e)).toList();
-    } else {
-      throw Exception('Invalid input');
+      return 'Error';
     }
   }
 
@@ -98,7 +72,7 @@ class _CalculatorState extends State<Calculator> {
               alignment: Alignment.bottomRight,
               child: Text(
                 _currentInput.isEmpty ? '0' : _currentInput,
-                style: const TextStyle(fontSize: 50),
+                style: const TextStyle(fontSize: 30),
               ),
             ),
           ),
@@ -107,7 +81,7 @@ class _CalculatorState extends State<Calculator> {
               padding: const EdgeInsets.all(20),
               alignment: Alignment.bottomRight,
               child: Text(
-                _result.isEmpty ? '' : _result,
+                _result.isEmpty ? '0' : _result,
                 style: const TextStyle(fontSize: 30),
               ),
             ),
@@ -149,13 +123,13 @@ class _CalculatorState extends State<Calculator> {
       child: Container(
         margin: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
+          color: Colors.blue,
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Center(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 30),
+            style: const TextStyle(fontSize: 20, color: Colors.white),
           ),
         ),
       ),
