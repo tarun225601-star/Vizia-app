@@ -18,16 +18,15 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.16.9'
-          channel: 'stable'
 
-      - name: Install dependencies
+      - name: Create Android Structure if missing
+        run: |
+          if [ ! -d "android" ]; then
+            flutter create . --org com.example --project-name ai_generated_app --platforms android
+          fi
+
+      - name: Install Dependencies
         run: flutter pub get
 
-      - name: Build APK Release
-        run: flutter build apk --release --no-pub
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-apk
-          path: build/app/outputs/flutter-apk/
+      - name: Build APK
+        run: flutter build apk --release
