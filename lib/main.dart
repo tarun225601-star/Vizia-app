@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -10,80 +12,111 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'Calculator App',
-      home: CalculatorPage(),
+      title: 'Weather App',
+      home: WeatherHomePage(),
     );
   }
 }
 
-class CalculatorPage extends StatefulWidget {
-  const CalculatorPage({Key? key}) : super(key: key);
+class WeatherHomePage extends StatefulWidget {
+  const WeatherHomePage({Key? key}) : super(key: key);
 
   @override
-  State<CalculatorPage> createState() => _CalculatorPageState();
+  State<WeatherHomePage> createState() => _WeatherHomePageState();
 }
 
-class _CalculatorPageState extends State<CalculatorPage> {
-  final _controller = TextEditingController();
-  double? _result;
+class _WeatherHomePageState extends State<WeatherHomePage> {
+  final _cityController = TextEditingController();
+  String _weatherDescription = '';
+  String _temperature = '';
+  String _humidity = '';
+  String _windSpeed = '';
+  String _error = '';
+
+  Future<void> _getWeather() async {
+    final response = await http.get(Uri.parse(
+        'https://api.openweathermap.org/data/2.5/weather?q=${_cityController.text}&appid=YOUR_API_KEY&units=metric'));
+
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      setState(() {
+        _weatherDescription = jsonData['weather'][0]['description'];
+        _temperature = '${jsonData['main']['temp']}Â°C';
+        _humidity = '${jsonData['main']['humidity']}%';
+        _windSpeed = '${jsonData['wind']['speed']} m/s';
+        _error = '';
+      });
+    } else {
+      setState(() {
+        _error = 'Failed to get weather data';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calculator'),
+        title: const Text('Weather App'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
             TextField(
-              controller: _controller,
+              controller: _cityController,
               decoration: const InputDecoration(
+                labelText: 'City',
                 border: OutlineInputBorder(),
-                labelText: 'Enter expression',
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                try {
-                  _result = eval(_controller.text);
-                  setState(() {});
-                } catch (e) {
-                  _result = null;
-                  setState(() {});
-                }
-              },
-              child: const Text('Calculate'),
+              onPressed: _getWeather,
+              child: const Text('Get Weather'),
             ),
-            const SizedBox(height: 16),
-            Text(_result != null ? 'Result: $_result' : 'Result: ')
+            const SizedBox(height: 20),
+            Text(
+              _weatherDescription,
+              style: const TextStyle(fontSize: 24),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              _temperature,
+              style: const TextStyle(fontSize: 48),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    const Text('Humidity'),
+                    Text(
+                      _humidity,
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    const Text('Wind Speed'),
+                    Text(
+                      _windSpeed,
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text(
+              _error,
+              style: const TextStyle(color: Colors.red),
+            ),
           ],
         ),
       ),
     );
-  }
-
-  double eval(String expression) {
-    // Implement your calculator logic here
-    // For simplicity, let's assume we only support addition and subtraction
-    final parts = expression.split('+');
-    if (parts.length > 1) {
-      double sum = 0;
-      for (var part in parts) {
-        sum += double.parse(part);
-      }
-      return sum;
-    }
-    parts = expression.split('-');
-    if (parts.length > 1) {
-      double diff = double.parse(parts[0]);
-      for (var i = 1; i < parts.length; i++) {
-        diff -= double.parse(parts[i]);
-      }
-      return diff;
-    }
-    throw Exception('Unsupported operation');
   }
 }
