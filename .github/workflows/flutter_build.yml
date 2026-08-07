@@ -1,9 +1,33 @@
-targets:
-  $default:
-    builders:
-      # Custom build rules configuration if needed
-      source_gen|combining_builder:
-        options:
-          ignore_for_file:
-            - type=lint_error
-            - invalid_annotation_target
+name: Flutter Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release
