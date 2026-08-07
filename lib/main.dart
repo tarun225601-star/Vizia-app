@@ -1,138 +1,189 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const CreatorMahakoshApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class CreatorMahakoshApp extends StatelessWidget {
+  const CreatorMahakoshApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '2020 AI',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        primarySwatch: Colors.deepPurple,
-        scaffoldBackgroundColor: const Color(0xFF121212),
-      ),
-      home: const CreatorHomeScreen(),
+      title: 'Creator Mahakosh AI',
+      theme: ThemeData.dark(),
+      home: const ReelsGeneratorScreen(),
     );
   }
 }
 
-class CreatorHomeScreen extends StatelessWidget {
-  const CreatorHomeScreen({super.key});
-
-  final List<Map<String, String>> platforms = const [
-    {"title": "YouTube Creator", "icon": "▶️", "desc": "Long & Short viral ideas"},
-    {"title": "Instagram Creator", "icon": "📸", "desc": "Reels & Engagement hooks"},
-    {"title": "Facebook Creator", "icon": "📘", "desc": "Video & Post optimization"},
-  ];
+class ReelsGeneratorScreen extends StatefulWidget {
+  const ReelsGeneratorScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('2020 AI - Creator Suite', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.deepPurple,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Select Platform:",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white70),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: ListView.builder(
-                itemCount: platforms.length,
-                itemBuilder: (context, index) {
-                  final item = platforms[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 14),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E1E),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.deepPurple.withOpacity(0.4)),
-                    ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(16),
-                      leading: Text(item['icon']!, style: const TextStyle(fontSize: 36)),
-                      title: Text(
-                        item['title']!,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.only(top: 6.0),
-                        child: Text(item['desc']!, style: const TextStyle(color: Colors.grey)),
-                      ),
-                      trailing: const Icon(Icons.arrow_forward_ios, color: Colors.deepPurple),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CreatorGeneratorScreen(platformName: item['title']!),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  State<ReelsGeneratorScreen> createState() => _ReelsGeneratorScreenState();
 }
 
-class CreatorGeneratorScreen extends StatefulWidget {
-  final String platformName;
-  const CreatorGeneratorScreen({super.key, required this.platformName});
-
-  @override
-  State<CreatorGeneratorScreen> createState() => _CreatorGeneratorScreenState();
-}
-
-class _CreatorGeneratorScreenState extends State<CreatorGeneratorScreen> {
-  final TextEditingController _controller = TextEditingController();
-  String _output = "";
+class _ReelsGeneratorScreenState extends State<ReelsGeneratorScreen> {
+  final TextEditingController _topicController = TextEditingController();
+  String _scriptOutput = "यहाँ रील्स की वायरल स्क्रिप्ट दिखाई देगी...";
   bool _isLoading = false;
 
-  final String apiKey = "TERI_API_KEY_YAHAN_DAL";
+  // एपीआई की सेव करने के लिए कंट्रोलर्स
+  final TextEditingController _geminiKeyController = TextEditingController();
+  final TextEditingController _grokKeyController = TextEditingController();
 
-  Future<void> _generateContent() async {
-    if (_controller.text.isEmpty) return;
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedKeys(); // ऐप शुरू होते ही सेव की हुई की लोड कर लेगा
+  }
+
+  // मोबाइल की मेमोरी से एपीआई की लोड करना
+  Future<void> _loadSavedKeys() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _geminiKeyController.text = prefs.getString('gemini_key') ?? '';
+      _grokKeyController.text = prefs.getString('grok_key') ?? '';
+    });
+  }
+
+  // कोने में सेटिंग डायलॉग बॉक्स दिखाने का फंक्शन
+  void _openSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('API Settings'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _geminiKeyController,
+                  decoration: const InputDecoration(
+                    labelText: 'Gemini API Key डाल',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _grokKeyController,
+                  decoration: const InputDecoration(
+                    labelText: 'Grok API Key डाल',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('gemini_key', _geminiKeyController.text.trim());
+                await prefs.setString('grok_key', _grokKeyController.text.trim());
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('API Keys Successfully Saved!')),
+                );
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 1. Google Gemini से स्क्रिप्ट जनरेट करने का फंक्शन
+  Future<void> generateReelsWithGemini(String topic) async {
+    String apiKey = _geminiKeyController.text.trim();
+    if (apiKey.isEmpty) {
+      setState(() {
+        _scriptOutput = "भाई पहले कोने वाली सेटिंग से Gemini की API Key डाल!";
+      });
+      return;
+    }
+
+    const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
+    final fullUrl = "$url$apiKey";
 
     setState(() {
       _isLoading = true;
-      _output = "";
+      _scriptOutput = "Gemini वायरल स्क्रिप्ट तैयार कर रहा है...";
     });
 
-    try {
-      final url = Uri.parse(
-          "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey");
+    String prompt = "Act as an expert Instagram Reels scriptwriter. Create a highly engaging, viral 30-second reel script for the topic: '$topic'. Include a powerful Hook (first 3 seconds), Main Body, and a strong Call to Action (CTA) with relevant hashtags in Hinglish.";
 
+    try {
       final response = await http.post(
-        url,
+        Uri.parse(fullUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "contents": [
-            {
-              "parts": [
-                {
-                  "text": "Act as an expert viral content creator for ${widget.platformName}. Generate a hook, script, and hashtags for this topic/idea: ${_controller.text}"
-                }
-              ]
-            }
+          "contents": [{"parts": [{"text": prompt}]}]
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _scriptOutput = data['candidates'][0]['content']['parts'][0]['text'];
+        });
+      } else {
+        setState(() {
+          _scriptOutput = "Gemini Error: ${response.body}";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _scriptOutput = "Exception: $e";
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // 2. Grok API से स्क्रिप्ट जनरेट करने का फंक्शन
+  Future<void> generateReelsWithGrok(String topic) async {
+    String apiKey = _grokKeyController.text.trim();
+    if (apiKey.isEmpty) {
+      setState(() {
+        _scriptOutput = "भाई पहले कोने वाली सेटिंग से Grok की API Key डाल!";
+      });
+      return;
+    }
+
+    const url = "https://api.x.ai/v1/chat/completions";
+
+    setState(() {
+      _isLoading = true;
+      _scriptOutput = "Grok ट्रेंडिंग डेटा के साथ स्क्रिप्ट तैयार कर रहा है...";
+    });
+
+    String prompt = "Act as an expert viral content creator. Write a catchy and trending Instagram Reel script for the topic: '$topic'. Make it punchy, engaging, and format it with Hook, Body, and CTA in Hinglish.";
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $apiKey",
+        },
+        body: jsonEncode({
+          "model": "grok-beta",
+          "messages": [
+            {"role": "user", "content": prompt}
           ]
         }),
       );
@@ -140,16 +191,16 @@ class _CreatorGeneratorScreenState extends State<CreatorGeneratorScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          _output = data['candidates'][0]['content']['parts'][0]['text'];
+          _scriptOutput = data['choices'][0]['message']['content'];
         });
       } else {
         setState(() {
-          _output = "Error: Failed to fetch response (${response.statusCode})";
+          _scriptOutput = "Grok Error: ${response.body}";
         });
       }
     } catch (e) {
       setState(() {
-        _output = "Exception: $e";
+        _scriptOutput = "Exception: $e";
       });
     } finally {
       setState(() {
@@ -161,45 +212,69 @@ class _CreatorGeneratorScreenState extends State<CreatorGeneratorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.platformName)),
+      appBar: AppBar(
+        title: const Text('Creator Mahakosh AI'),
+        centerTitle: true,
+        actions: [
+          // कोने में सेटिंग बटन
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => _openSettingsDialog(context),
+            tooltip: 'API Settings',
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
-              controller: _controller,
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: "अपना वीडियो टॉपिक यहाँ लिखें...",
-                filled: true,
-                fillColor: const Color(0xFF1E1E1E),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              controller: _topicController,
+              decoration: const InputDecoration(
+                labelText: 'रील का टॉपिक यहाँ लिखें (जैसे: Fitness, Tech, Business)...',
+                border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-                onPressed: _isLoading ? null : _generateContent,
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Generate Viral Content 🚀', style: TextStyle(fontSize: 16)),
-              ),
+            const SizedBox(height: 14),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _isLoading ? null : () {
+                    if (_topicController.text.isNotEmpty) {
+                      generateReelsWithGemini(_topicController.text);
+                    }
+                  },
+                  icon: const Icon(Icons.flash_on, color: Colors.amber),
+                  label: const Text('Generate with Gemini'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _isLoading ? null : () {
+                    if (_topicController.text.isNotEmpty) {
+                      generateReelsWithGrok(_topicController.text);
+                    }
+                  },
+                  icon: const Icon(Icons.bolt, color: Colors.blueAccent),
+                  label: const Text('Generate with Grok'),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : const SizedBox.shrink(),
+            const SizedBox(height: 10),
             Expanded(
-              child: SingleChildScrollView(
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E1E),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SingleChildScrollView(
                   child: Text(
-                    _output.isEmpty ? "वायरल स्क्रिप्ट यहाँ दिखाई देगी..." : _output,
+                    _scriptOutput,
                     style: const TextStyle(fontSize: 15, height: 1.4),
                   ),
                 ),
